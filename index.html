@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0614" />
+    <meta name="description" content="Phantom Proyect — Boost de cuentas GTA para PC. Seguro, con soporte por Discord." />
+    <title>PHANTOM PROJECT — Boost de cuentas GTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'], heading: ['Outfit', 'Inter', 'sans-serif'] },
+            colors: {
+              dark: { 950: '#0a0614', 900: '#0f0a1a', 800: '#151020', 700: '#1a1530' },
+              accent: '#7C3AED',
+            },
+            borderRadius: { xl: '1rem', '2xl': '1.25rem', '3xl': '1.5rem' },
+            boxShadow: {
+              'glass': '0 8px 32px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.06)',
+              'glass-hover': '0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(124,58,237,0.15)',
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="min-h-screen bg-dark-950 font-sans text-white">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-dark-800 focus:px-4 focus:py-2 focus:text-sm">Saltar al contenido</a>
+
+    <!-- Background: 4 capas (base, network+partículas canvas, orbes, contenido encima) -->
+    <div class="bg-wrap" id="bg-wrap" aria-hidden="true">
+      <div class="bg-base"></div>
+      <canvas class="bg-canvas" id="bg-canvas" width="1" height="1"></canvas>
+      <div class="bg-orbs" id="bg-orbs"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 border-b border-white/5 bg-dark-950/80 backdrop-blur-xl">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-1 md:px-6 md:py-1.5" aria-label="Principal">
+        <a href="#inicio" class="flex items-center" aria-label="Phantom Store - Inicio">
+          <span class="flex items-center text-xs font-bold leading-none tracking-tight sm:text-sm md:text-base"><span class="text-[#7C3AED]">PHANTOM</span><span class="text-white"> STORE</span></span>
+        </a>
+        <div id="nav-links" class="hidden items-center gap-0.5 md:flex">
+          <a href="#servicios" class="rounded-lg px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white">Servicios</a>
+          <a href="#packs" class="rounded-lg px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white">Packs</a>
+          <a href="#faq" class="rounded-lg px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white">FAQ</a>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="cart-trigger relative rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white" id="cart-trigger" aria-label="Abrir carrito" aria-controls="cart-drawer">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <span class="cart-count absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-white" id="cart-count" aria-live="polite" style="display: none">0</span>
+          </button>
+          <a href="#packs" class="btn-secondary hidden rounded-full px-3 py-1.5 text-sm font-semibold md:inline-block">Ver Packs</a>
+          <a data-link="discord" href="#" rel="noreferrer" class="btn-primary rounded-full px-4 py-2 text-sm font-semibold">Entrar a Discord</a>
+          <button type="button" class="nav-toggle inline-flex rounded-lg p-2 text-white/80 hover:bg-white/10 md:hidden" aria-expanded="false" aria-controls="nav-links" aria-label="Menú">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="contenido">
+      <!-- Hero -->
+      <section id="inicio" class="relative px-4 pt-16 pb-0 md:px-6 md:pt-24 md:pb-0">
+        <div class="mx-auto max-w-6xl">
+          <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+            <div class="max-w-xl">
+              <h1 class="text-4xl font-extrabold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl">
+                Boost de cuentas GTA en PC, seguro y con soporte.
+              </h1>
+              <p class="mt-6 text-lg text-white/60 md:text-xl">
+                Atención por Discord, entrega coordinada y seguimiento del pedido.
+              </p>
+              <div class="mt-10 flex flex-wrap gap-4">
+                <a data-link="discord" href="#" rel="noreferrer" class="btn-primary inline-flex rounded-full px-6 py-3.5 text-base font-semibold">Entrar a Discord</a>
+                <a href="#packs" class="btn-secondary inline-flex rounded-full px-6 py-3.5 text-base font-semibold">Ver Packs</a>
+              </div>
+            </div>
+            <div class="ticket-panel recuadro-hover relative rounded-2xl border border-white/10 shadow-glass overflow-hidden">
+              <img src="./abrir-ticket.png" alt="" class="ticket-panel-img block w-full h-auto object-contain" />
+              <a data-link="discord" href="#" rel="noreferrer" class="ticket-panel-btn btn-primary absolute bottom-5 left-5 inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold shadow-lg md:bottom-6 md:left-6 md:px-8 md:py-3.5" aria-label="Abrir ticket en Discord">Abrir ticket</a>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+          <a data-link="youtube" href="#" target="_blank" rel="noreferrer" class="btn-youtube btn-social inline-flex w-40 items-center justify-center rounded-xl py-4 text-base font-bold text-white shadow-lg">YouTube</a>
+          <a data-link="tiktok" href="#" target="_blank" rel="noreferrer" class="btn-tiktok btn-social inline-flex w-40 items-center justify-center rounded-xl py-4 text-base font-bold text-white shadow-lg">TikTok</a>
+        </div>
+        <div class="social-caption recuadro-hover mx-auto mt-6 max-w-[680px] rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-4 backdrop-blur-sm md:grid md:grid-cols-2 md:gap-6 md:px-5 md:py-[18px]">
+          <div class="flex flex-col gap-1 md:gap-2">
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-white/90">
+              <span class="text-violet-400" aria-hidden="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </span>
+              YouTube
+            </h3>
+            <p class="text-sm leading-relaxed text-white/70">Streams en vivo, pruebas reales y entregas transparentes.</p>
+          </div>
+          <div class="mt-4 flex flex-col gap-1 md:mt-0 md:gap-2">
+            <h3 class="flex items-center gap-2 text-sm font-semibold text-white/90">
+              <span class="text-violet-400" aria-hidden="true">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+              </span>
+              TikTok
+            </h3>
+            <p class="text-sm leading-relaxed text-white/70">Clips rápidos, resultados finales y contenido diario.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ¿Por qué elegir Phantom Project? -->
+      <section id="por-que-phantom" class="relative px-4 py-16 md:px-6 md:py-20" aria-labelledby="por-que-title">
+        <div class="mx-auto max-w-6xl">
+          <div class="rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-10 shadow-glass backdrop-blur-sm md:px-10 md:py-12">
+            <h2 id="por-que-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">¿Por qué elegir Phantom Project?</h2>
+            <p class="mt-3 max-w-2xl text-lg text-white/60">Confianza y transparencia en cada entrega.</p>
+            <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 why-grid">
+              <div class="why-card flex flex-col rounded-2xl border border-white/5 bg-white/[0.08] p-7 shadow-glass backdrop-blur-xl md:p-8">
+                <span class="why-card-icon flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20 text-accent" aria-hidden="true">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </span>
+                <h3 class="mt-4 text-base font-bold text-white">Entrega segura</h3>
+                <p class="mt-1.5 text-sm text-white/60">Trabajo acordado y transparente.</p>
+              </div>
+              <div class="why-card flex flex-col rounded-2xl border border-white/5 bg-white/[0.08] p-7 shadow-glass backdrop-blur-xl md:p-8">
+                <span class="why-card-icon flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20 text-accent" aria-hidden="true">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-2-2v-4a2 2 0 012-2h2V8z"/></svg>
+                </span>
+                <h3 class="mt-4 text-base font-bold text-white">Atención personalizada</h3>
+                <p class="mt-1.5 text-sm text-white/60">Soporte directo 1 a 1 por Discord.</p>
+              </div>
+              <div class="why-card flex flex-col rounded-2xl border border-white/5 bg-white/[0.08] p-7 shadow-glass backdrop-blur-xl md:p-8">
+                <span class="why-card-icon flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20 text-accent" aria-hidden="true">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                </span>
+                <h3 class="mt-4 text-base font-bold text-white">Coordinación clara</h3>
+                <p class="mt-1.5 text-sm text-white/60">Proceso organizado y seguimiento del pedido.</p>
+              </div>
+              <div class="why-card flex flex-col rounded-2xl border border-white/5 bg-white/[0.08] p-7 shadow-glass backdrop-blur-xl md:p-8">
+                <span class="why-card-icon flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20 text-accent" aria-hidden="true">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                </span>
+                <h3 class="mt-4 text-base font-bold text-white">Soporte continuo</h3>
+                <p class="mt-1.5 text-sm text-white/60">Antes, durante y después del servicio.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Packs -->
+      <section id="packs" class="relative px-4 py-6 md:px-6 md:py-6" aria-labelledby="packs-title">
+        <div class="mx-auto max-w-6xl">
+          <div class="packs-box rounded-3xl border border-white/10 bg-white/[0.06] px-6 py-10 shadow-packs md:px-10 md:py-12">
+            <h2 id="packs-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">Packs</h2>
+            <p class="mt-3 max-w-2xl text-lg text-white/60">Elegí el pack que necesitás. Toda la coordinación y entrega se hace por Discord.</p>
+            <div class="mt-12 grid gap-8 sm:grid-cols-2 md:grid-cols-3" id="packs-container">
+              <!-- 5 packs + botón "Ver más packs" inyectados por JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cómo funciona -->
+      <section id="servicios" class="relative px-4 py-20 md:px-6 md:py-28" aria-labelledby="steps-title">
+        <div class="mx-auto max-w-6xl">
+          <h2 id="steps-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">Cómo funciona</h2>
+          <p class="mt-3 max-w-2xl text-lg text-white/60">En tres pasos coordinamos todo por Discord.</p>
+          <div class="mt-12 grid gap-6 md:grid-cols-3">
+            <div class="recuadro-hover rounded-2xl border border-white/10 bg-white/5 p-8 shadow-glass backdrop-blur-xl">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-lg font-bold text-accent">1</span>
+              <h3 class="mt-4 text-xl font-bold text-white">Entrás al Discord</h3>
+              <p class="mt-2 text-white/60">Unite al servidor y revisá los canales de información y precios.</p>
+            </div>
+            <div class="recuadro-hover rounded-2xl border border-white/10 bg-white/5 p-8 shadow-glass backdrop-blur-xl">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-lg font-bold text-accent">2</span>
+              <h3 class="mt-4 text-xl font-bold text-white">Abrís ticket</h3>
+              <p class="mt-2 text-white/60">Indicás el pack o servicio que querés y te asignamos un canal de atención.</p>
+            </div>
+            <div class="recuadro-hover rounded-2xl border border-white/10 bg-white/5 p-8 shadow-glass backdrop-blur-xl">
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-lg font-bold text-accent">3</span>
+              <h3 class="mt-4 text-xl font-bold text-white">Coordinamos y entregamos</h3>
+              <p class="mt-2 text-white/60">Seguimiento del pedido y entrega según lo acordado.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="relative px-4 py-20 md:px-6 md:py-28" aria-labelledby="faq-title">
+        <div class="mx-auto max-w-3xl">
+          <h2 id="faq-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">Preguntas frecuentes</h2>
+          <p class="mt-3 text-lg text-white/60">Respuestas rápidas. Para más detalle, escribinos por Discord.</p>
+          <div class="mt-10 space-y-3">
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Cómo compro?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Entrás a Discord, abrís ticket y indicás el pack o servicio. Ahí coordinamos todo.</p>
+            </details>
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Para qué plataforma es?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Todo lo ofrecido acá es para GTA Online en PC.</p>
+            </details>
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Los precios están en la web?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Los precios finales se confirman en Discord según tu caso y stock.</p>
+            </details>
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Qué pasa si quiero algo que no está listado?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Escribinos por Discord; si se puede, lo armamos.</p>
+            </details>
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Es seguro?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Trabajamos por Discord con seguimiento y política de compensación. Revisá los términos en el footer.</p>
+            </details>
+            <details class="faq-item recuadro-hover rounded-2xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl">
+              <summary class="cursor-pointer list-none px-6 py-4 font-semibold text-white [&::-webkit-details-marker]:hidden">¿Cuánto tarda la entrega?</summary>
+              <p class="border-t border-white/10 px-6 pb-4 pt-3 text-white/70">Depende del pack y la cola. Te damos un estimado al abrir el ticket.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA final -->
+      <section class="relative px-4 py-20 md:px-6 md:py-28">
+        <div class="recuadro-hover mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-glass backdrop-blur-xl md:p-12">
+          <h2 class="text-2xl font-bold text-white md:text-3xl">¿Listo para empezar?</h2>
+          <p class="mt-3 text-white/60">Todo se coordina por Discord.</p>
+          <a data-link="discord" href="#" rel="noreferrer" class="btn-primary mt-8 inline-flex rounded-full px-8 py-4 text-base font-semibold">Entrar a Discord</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-dark-950/90 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 md:flex-row md:px-6">
+        <span class="text-sm text-white/50">© 2026 Phantom Proyect</span>
+        <div class="flex flex-wrap items-center justify-center gap-6">
+          <a data-link="discord" href="#" rel="noreferrer" class="text-sm font-medium text-white/70 hover:text-white">Discord</a>
+          <a data-link="youtube" href="#" target="_blank" rel="noreferrer" class="text-sm font-medium text-white/70 hover:text-white">YouTube</a>
+          <div class="footer-dropdown relative">
+            <button type="button" class="footer-dropdown-trigger text-sm font-semibold text-white/70 hover:text-white" aria-expanded="false" aria-haspopup="true" aria-controls="footer-policies-menu">Términos y políticas</button>
+            <div class="footer-dropdown-menu absolute bottom-full right-0 mb-2 min-w-[200px] rounded-xl border border-white/10 bg-dark-800 py-2 shadow-xl" id="footer-policies-menu" role="menu" aria-hidden="true">
+              <button type="button" class="footer-policy-link w-full px-4 py-2.5 text-left text-sm font-medium text-white/90 hover:bg-white/10" data-section="politica-privacidad" role="menuitem">Política de privacidad</button>
+              <button type="button" class="footer-policy-link w-full px-4 py-2.5 text-left text-sm font-medium text-white/90 hover:bg-white/10" data-section="politica-reembolso" role="menuitem">Política de reembolso</button>
+              <button type="button" class="footer-policy-link w-full px-4 py-2.5 text-left text-sm font-medium text-white/90 hover:bg-white/10" data-section="terminos-servicio" role="menuitem">Términos del servicio</button>
+              <a href="#inicio" class="block w-full px-4 py-2.5 text-left text-sm font-medium text-white/90 hover:bg-white/10" role="menuitem">Información de contacto</a>
+              <button type="button" class="footer-policy-link w-full px-4 py-2.5 text-left text-sm font-medium text-white/90 hover:bg-white/10" data-section="politica-cancelacion" role="menuitem">Política de cancelación</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Rewards tab -->
+    <button type="button" class="rewards-tab fixed right-0 top-1/2 z-40 flex -translate-y-1/2 flex-col items-center gap-2 rounded-l-2xl border border-violet-500/30 bg-[#7C3AED] px-3 py-5 shadow-lg backdrop-blur-sm" id="rewards-tab-btn" aria-label="Código de descuento">
+      <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold text-white">%</span>
+      <span class="text-[10px] font-semibold uppercase tracking-wider text-white" style="writing-mode:vertical-rl; transform:rotate(180deg)">Descuento</span>
+    </button>
+
+    <!-- Carrito (drawer lateral) -->
+    <div class="cart-overlay fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity" id="cart-overlay" aria-hidden="true"></div>
+    <aside class="cart-drawer fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-dark-900 shadow-2xl transition-transform" id="cart-drawer" role="dialog" aria-labelledby="cart-title" aria-modal="true">
+      <div class="cart-header flex flex-shrink-0 items-center justify-between border-b border-white/10 px-5 py-4">
+        <h2 id="cart-title" class="text-lg font-bold text-white">Carrito</h2>
+        <button type="button" class="cart-close rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white" aria-label="Cerrar carrito">&times;</button>
+      </div>
+      <div class="cart-body flex-1 overflow-y-auto px-5 py-4">
+        <div id="cart-items" class="space-y-4">
+          <!-- Items renderizados por JS -->
+        </div>
+        <p id="cart-empty" class="hidden py-8 text-center text-white/50">Tu carrito está vacío.</p>
+      </div>
+      <div class="cart-footer flex-shrink-0 border-t border-white/10 px-5 py-4">
+        <div class="flex items-center justify-between text-sm">
+          <span class="font-medium text-white/70">SUBTOTAL</span>
+          <span class="font-bold text-white" id="cart-subtotal">$0,00</span>
+        </div>
+        <p class="mt-2 text-xs text-white/50">Shipping and discount codes are added at checkout.</p>
+        <a href="#" class="hidden text-center text-sm font-medium text-white/70 hover:text-white" id="cart-view-cart">View cart</a>
+        <a data-link="discord" href="#" rel="noreferrer" class="btn-primary mt-4 flex w-full items-center justify-center rounded-xl py-3.5 text-base font-semibold" id="cart-checkout">Checkout</a>
+      </div>
+    </aside>
+
+    <!-- Modal producto (pack) -->
+    <div class="product-modal-backdrop fixed inset-0 z-50 bg-black/60 backdrop-blur-sm opacity-0 invisible transition-all duration-300" id="product-modal-backdrop" aria-hidden="true"></div>
+    <div class="product-modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-all duration-300" id="product-modal" role="dialog" aria-labelledby="product-modal-title" aria-modal="true">
+      <div class="product-modal-box relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-dark-900 shadow-2xl">
+        <button type="button" class="product-modal-close absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-xl text-white/80 hover:bg-white/15 hover:text-white" aria-label="Cerrar">&times;</button>
+        <div class="product-modal-body flex flex-1 flex-col overflow-y-auto md:flex-row">
+          <div class="product-modal-image flex-shrink-0 md:w-2/5">
+            <img id="product-modal-img" src="" alt="" class="h-48 w-full object-contain bg-white/5 md:h-72" />
+          </div>
+          <div class="product-modal-content flex flex-1 flex-col px-6 pb-6 pt-4 md:px-8 md:pt-6">
+            <!-- Vista normal (resto de packs) -->
+            <div id="product-modal-normal-wrapper" class="flex flex-1 flex-col">
+              <span class="product-modal-badge hidden rounded bg-red-600 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white" id="product-modal-badge"></span>
+              <h2 id="product-modal-title" class="mt-2 text-2xl font-bold text-white md:text-3xl"></h2>
+              <p id="product-modal-price" class="mt-2 text-xl font-bold text-accent"></p>
+              <p id="product-modal-desc" class="mt-4 text-sm leading-relaxed text-white/70"></p>
+              <div class="mt-4">
+                <h4 class="text-sm font-semibold text-white/90">Incluye</h4>
+                <ul id="product-modal-features" class="mt-2 space-y-1 text-sm text-white/60"></ul>
+              </div>
+              <div class="mt-4 hidden" id="product-modal-advantages-wrap">
+                <h4 class="text-sm font-semibold text-white/90">Ventajas</h4>
+                <ul id="product-modal-advantages" class="mt-2 space-y-1 text-sm text-white/60"></ul>
+              </div>
+              <p id="product-modal-info" class="mt-4 text-xs text-white/50"></p>
+              <div class="mt-6 flex flex-col gap-3">
+                <button type="button" class="btn-primary product-modal-add-cart w-full rounded-xl py-3.5 text-base font-semibold" id="product-modal-add-cart">Add to Cart</button>
+                <button type="button" class="btn-secondary w-full rounded-xl py-3 text-base font-semibold" id="product-modal-buy-now">Buy Now</button>
+                <a data-link="discord" href="#" rel="noreferrer" class="flex items-center justify-center rounded-xl py-3 text-center text-sm font-medium text-white/60 hover:text-white">Need help? Contact us on Discord</a>
+              </div>
+            </div>
+            <!-- Vista configurador Custom Pack -->
+            <div id="product-modal-custom-wrapper" class="hidden flex flex-1 flex-col" aria-hidden="true">
+              <h2 id="custom-config-title" class="mt-2 text-2xl font-bold text-white md:text-3xl">Custom Pack</h2>
+              <p id="custom-config-price" class="mt-2 text-xl font-bold text-accent">$9.99</p>
+              <p class="custom-config-subtitle mt-1 text-sm text-white/50">Paquete totalmente personalizado, arma tu cuenta a medida.</p>
+              <div class="custom-config-sections mt-6 space-y-6">
+                <div>
+                  <h4 class="text-sm font-semibold text-white/90 mb-2">Dinero</h4>
+                  <div id="custom-config-dinero" class="flex flex-col gap-2" role="group" aria-label="Elegir cantidad de dinero"></div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold text-white/90 mb-2">Nivel</h4>
+                  <div id="custom-config-nivel" class="flex flex-col gap-2" role="group" aria-label="Elegir nivel"></div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold text-white/90 mb-2">Autos y atuendos modificados</h4>
+                  <div id="custom-config-autos" class="flex flex-col gap-2" role="group" aria-label="Elegir pack de autos y atuendos"></div>
+                </div>
+              </div>
+              <div class="mt-6 flex flex-col gap-3">
+                <button type="button" class="btn-primary w-full rounded-xl py-3.5 text-base font-semibold" id="custom-config-add-cart">Agregar al carrito</button>
+                <button type="button" class="btn-secondary w-full rounded-xl py-3 text-base font-semibold" id="custom-config-buy-now">Comprar ahora</button>
+                <a data-link="discord" href="#" rel="noreferrer" class="flex items-center justify-center rounded-xl py-3 text-center text-sm font-medium text-white/60 hover:text-white">¿Dudas? Contactanos por Discord</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p id="product-modal-added-msg" class="hidden border-t border-white/10 bg-emerald-500/20 px-6 py-3 text-center text-sm font-semibold text-emerald-300">Added to cart</p>
+      </div>
+    </div>
+
+    <!-- Modal cupón -->
+    <div class="coupon-modal fixed inset-0 z-50 flex items-center justify-center p-4" id="coupon-modal" role="dialog" aria-labelledby="coupon-modal-title" aria-modal="true" hidden>
+      <div class="coupon-modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+      <div class="coupon-modal-box relative max-w-md rounded-2xl border border-white/10 bg-dark-900 p-6 shadow-2xl">
+        <button type="button" class="coupon-modal-close absolute right-4 top-4 rounded-lg p-2 text-white/70 hover:bg-white/10" aria-label="Cerrar">&times;</button>
+        <h2 id="coupon-modal-title" class="text-xl font-bold text-white">Código de descuento</h2>
+        <p class="mt-2 text-sm text-white/60">Ingresá tu código para aplicar un 10% de descuento.</p>
+        <form id="coupon-form" class="mt-6 space-y-4">
+          <input type="text" id="coupon-input" class="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="Código" autocomplete="off" maxlength="20" />
+          <button type="submit" class="btn-primary w-full rounded-xl py-3 font-semibold">Aplicar código</button>
+        </form>
+        <p id="coupon-message" class="mt-4 min-h-[1.5rem] text-sm font-semibold" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <!-- Modal políticas -->
+    <div class="policy-modal fixed inset-0 z-50 flex items-center justify-center p-4" id="policy-modal" role="dialog" aria-labelledby="policy-modal-title" aria-modal="true" aria-hidden="true">
+      <div class="policy-modal-backdrop absolute inset-0 bg-black/75 backdrop-blur-md"></div>
+      <div class="policy-modal-box relative flex max-h-[85vh] w-full max-w-xl flex-col rounded-2xl border border-white/10 bg-dark-900 shadow-2xl">
+        <button type="button" class="policy-modal-close absolute right-4 top-4 z-10 rounded-lg p-2 text-white/70 hover:bg-white/10" aria-label="Cerrar">&times;</button>
+        <h2 id="policy-modal-title" class="flex-shrink-0 px-6 pt-6 text-xl font-bold text-white">Términos y políticas</h2>
+        <div class="policy-modal-body overflow-y-auto px-6 pb-6 pt-4" id="policy-modal-body">
+          <div class="terminos-block border-t border-white/10 pt-4 first:border-0 first:pt-0" id="politica-privacidad">
+            <h3 class="text-lg font-bold text-white">Política de privacidad</h3>
+            <p class="mt-2 text-sm text-white/70">El uso de este sitio y la coordinación de pedidos se realizan a través de Discord. No almacenamos datos de pago en esta web. Cualquier dato que compartas se gestiona en el servidor de Discord de Phantom Proyect.</p>
+          </div>
+          <div class="terminos-block border-t border-white/10 pt-4 first:border-0 first:pt-0" id="politica-reembolso">
+            <h3 class="text-lg font-bold text-white">Política de reembolso</h3>
+            <p class="mt-2 font-semibold text-white/90">1. Compensación digital (Boosting)</p>
+            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-white/70">
+              <li>Gastá menos de 7,5M GTA$ por día hasta 7 días después de la compra (comprobable con capturas).</li>
+              <li>Pruebas suficientes (aviso de ban, historial). Dinero en juego visible. Fechas desde metadatos.</li>
+              <li>No reembolsos por baneos ni error del usuario.</li>
+              <li>Si las pruebas están editadas o son insuficientes, la compensación no es posible.</li>
+              <li>No se otorgan otros reembolsos en otras circunstancias.</li>
+            </ul>
+            <p class="mt-4 text-sm text-white/70">Al usar nuestros servicios aceptás: uso bajo tu riesgo; conocer los riesgos de mods (incl. baneos); cumplir esta política; Phantom Proyect no se hace responsable salvo lo indicado aquí.</p>
+            <p class="mt-4 font-semibold text-white/90">2. Otros productos</p>
+            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-white/70">
+              <li>Responsabilidad solo si el error es exclusivamente nuestro. No aplica si compraste para PC y sos de otra plataforma o faltan datos que debías dar.</li>
+              <li>Datos del titular deben coincidir con el cliente. Si no, puede considerarse fraude y cancelación. Primera vez: posible devolución. Si se repite: nos reservamos derecho a descontar comisiones y tiempo de trabajo.</li>
+            </ul>
+            <p class="mt-4 text-sm text-white/70">Nos reservamos el derecho de actualizar estos términos. Es tu responsabilidad revisarlos periódicamente.</p>
+          </div>
+          <div class="terminos-block border-t border-white/10 pt-4 first:border-0 first:pt-0" id="terminos-servicio">
+            <h3 class="text-lg font-bold text-white">Términos del servicio</h3>
+            <p class="mt-2 text-sm text-white/70">Al usar Phantom Proyect aceptás los términos aquí descritos y nuestra política de reembolso. El soporte y los pedidos se gestionan por Discord. Nos reservamos el derecho de actualizar estos términos.</p>
+          </div>
+          <div class="terminos-block border-t border-white/10 pt-4 first:border-0 first:pt-0" id="politica-cancelacion">
+            <h3 class="text-lg font-bold text-white">Política de cancelación</h3>
+            <p class="mt-2 text-sm text-white/70">Las cancelaciones y reembolsos se rigen por la Política de reembolso. Contactanos por Discord con las pruebas indicadas en dicha política.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a data-link="discord" href="#" rel="noreferrer" class="floating-discord fixed bottom-6 right-6 z-40 rounded-full bg-accent px-5 py-3 font-bold text-white shadow-lg hover:opacity-95" aria-label="Ir a Discord">Discord</a>
+
+    <script src="./packs-config.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

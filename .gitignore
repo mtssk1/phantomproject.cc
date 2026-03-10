@@ -1,0 +1,7 @@
+# No subir archivos con secretos
+.env
+.env.local
+.env.*.local
+
+# Dependencias y build
+node_modules/

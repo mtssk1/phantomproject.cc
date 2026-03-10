@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0614" />
+    <meta name="description" content="Pedido confirmado — Phantom Project" />
+    <title>Pedido confirmado — PHANTOM PROJECT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'], heading: ['Outfit', 'Inter', 'sans-serif'] },
+            colors: { dark: { 950: '#0a0614', 900: '#0f0a1a', 800: '#151020' }, accent: '#7C3AED' },
+            borderRadius: { xl: '1rem', '2xl': '1.25rem' },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./success.css" />
+  </head>
+  <body class="min-h-screen bg-dark-950 font-sans text-white success-page">
+    <div class="success-bg" aria-hidden="true"></div>
+
+    <header class="sticky top-0 z-50 border-b border-white/5 bg-dark-950/80 backdrop-blur-xl">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6" aria-label="Principal">
+        <a href="index.html" class="flex items-center" aria-label="Phantom Project">
+          <span class="text-lg font-bold tracking-tight"><span class="text-[#7C3AED]">PHANTOM</span><span class="text-white"> PROJECT</span></span>
+        </a>
+      </nav>
+    </header>
+
+    <main class="relative mx-auto max-w-xl px-4 py-12 md:py-20">
+      <!-- Contenido con datos del pedido -->
+      <div id="success-content" class="success-card rounded-2xl border border-white/10 bg-dark-800/90 p-8 shadow-xl backdrop-blur-xl">
+        <h1 class="font-heading text-3xl font-bold tracking-tight text-white md:text-4xl">Pedido confirmado</h1>
+        <p class="mt-4 text-lg text-white/80">Tu pago fue recibido correctamente.</p>
+
+        <p class="mt-6 text-sm font-medium text-white/70">ID del pedido:</p>
+        <p id="success-order-id" class="success-order-id mt-1 text-xl font-bold tracking-wide text-[#7C3AED] md:text-2xl">—</p>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button type="button" id="success-copy-id" class="success-btn-copy rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15">
+            Copiar ID del pedido
+          </button>
+          <span id="success-copy-feedback" class="hidden items-center gap-1.5 text-sm font-medium text-emerald-400" aria-live="polite">ID copiado</span>
+        </div>
+
+        <p id="success-email-msg" class="mt-4 hidden text-sm text-emerald-400/90">Te enviamos una confirmación por email.</p>
+
+        <!-- Resumen del pedido -->
+        <div id="success-order-summary" class="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+          <!-- Rellenado por success.js -->
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <a id="success-discord-btn" href="#" target="_blank" rel="noopener noreferrer" class="success-btn-primary inline-flex items-center justify-center rounded-xl bg-[#7C3AED] px-6 py-3.5 text-base font-bold text-white shadow-lg transition hover:opacity-95 hover:shadow-[0_8px_24px_rgba(124,58,237,0.4)]">
+            Abrir Discord
+          </a>
+          <a href="index.html" class="success-btn-secondary inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/15">
+            Volver a la tienda
+          </a>
+        </div>
+
+        <p class="mt-8 text-sm leading-relaxed text-white/70">Cuando el staff confirme tu pedido, deberás enviar la información de tu cuenta usando este ID del pedido.</p>
+
+        <div id="success-account-info-block" class="success-account-block mt-6 rounded-xl border border-white/10 bg-white/5 p-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-white/50">ID del pedido</p>
+          <p id="success-order-id-repeat" class="mt-1 font-mono text-base font-bold text-[#7C3AED]">—</p>
+          <div class="mt-5 space-y-3 text-sm text-white/70">
+            <p><span class="font-medium text-white/80">Correo Rockstar:</span><br /><span class="text-white/50">(tu correo de Rockstar Social Club)</span></p>
+            <p><span class="font-medium text-white/80">Contraseña Rockstar:</span><br /><span class="text-white/50">(contraseña temporal o la que uses)</span></p>
+            <p><span class="font-medium text-white/80">Usuario Steam:</span><br /><span class="text-white/50">(tu usuario o correo de Steam)</span></p>
+            <p><span class="font-medium text-white/80">Contraseña Steam:</span><br /><span class="text-white/50">(contraseña temporal o la que uses)</span></p>
+            <p><span class="font-medium text-white/80">Información adicional:</span><br /><span class="text-white/50">(detalles personalizados, versión del juego, etc.)</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío: sin datos de pedido -->
+      <div id="success-empty" class="success-card hidden rounded-2xl border border-white/10 bg-dark-800/90 p-8 text-center shadow-xl backdrop-blur-xl">
+        <h1 class="font-heading text-2xl font-bold text-white md:text-3xl">No se encontró información del pedido</h1>
+        <p class="mt-4 text-white/70">Si acabas de completar una compra, recarga la página. Si el problema continúa, contactanos por Discord.</p>
+        <a href="index.html" class="success-btn-primary mt-8 inline-flex items-center justify-center rounded-xl bg-[#7C3AED] px-6 py-3.5 text-base font-bold text-white shadow-lg transition hover:opacity-95">
+          Volver a la tienda
+        </a>
+      </div>
+    </main>
+
+    <script src="./success.js"></script>
+  </body>
+</html>

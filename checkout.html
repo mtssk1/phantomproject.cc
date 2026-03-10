@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0614" />
+    <meta name="description" content="Checkout — Phantom Project" />
+    <title>Checkout — PHANTOM PROJECT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'], heading: ['Outfit', 'Inter', 'sans-serif'] },
+            colors: { dark: { 950: '#0a0614', 900: '#0f0a1a', 800: '#151020', 700: '#1a1530' }, accent: '#7C3AED' },
+            borderRadius: { xl: '1rem', '2xl': '1.25rem' },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./checkout.css" />
+  </head>
+  <body class="min-h-screen bg-dark-950 font-sans text-white checkout-page">
+    <div class="checkout-bg" aria-hidden="true"></div>
+
+    <header class="sticky top-0 z-50 border-b border-white/5 bg-dark-950/80 backdrop-blur-xl">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6" aria-label="Principal">
+        <a href="index.html" class="flex items-center" aria-label="Phantom Store">
+          <span class="text-lg font-bold tracking-tight"><span class="text-[#7C3AED]">PHANTOM</span><span class="text-white"> PROJECT</span></span>
+        </a>
+        <a href="index.html#packs" class="text-sm font-medium text-white/70 hover:text-white">Volver a la tienda</a>
+      </nav>
+    </header>
+
+    <!-- Barra de confianza -->
+    <div class="checkout-trust-bar border-b border-white/5 bg-dark-900/60 py-3">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-6 px-4 text-sm md:gap-10">
+        <span class="checkout-trust-item flex items-center gap-2 text-white/85">
+          <span class="checkout-trust-icon flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-base" aria-hidden="true">🔒</span>
+          Secure Payment
+        </span>
+        <span class="checkout-trust-item flex items-center gap-2 text-white/85">
+          <span class="checkout-trust-icon flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-base" aria-hidden="true">⚡</span>
+          Fast Delivery
+        </span>
+        <span class="checkout-trust-item flex items-center gap-2 text-white/85">
+          <span class="checkout-trust-icon flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-base" aria-hidden="true">🎧</span>
+          24/7 Support
+        </span>
+      </div>
+    </div>
+
+    <main class="relative mx-auto max-w-6xl px-4 py-8 md:py-12 lg:py-16">
+      <div class="checkout-grid grid gap-8 lg:grid-cols-[1fr,400px] lg:gap-12">
+        <!-- Columna izquierda: formulario -->
+        <div class="checkout-form-column order-2 lg:order-1">
+          <h1 class="font-heading text-2xl font-bold tracking-tight text-white md:text-3xl">PHANTOM PROJECT</h1>
+
+          <form id="checkout-form" class="mt-8 space-y-8" novalidate>
+            <!-- Contacto -->
+            <section class="checkout-section">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-white/90">Contacto</h2>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label for="checkout-email" class="block text-sm font-medium text-white/80">Correo electrónico</label>
+                  <input type="email" id="checkout-email" name="email" required autocomplete="email" placeholder="tu@email.com" class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                </div>
+                <div>
+                  <label for="checkout-discord" class="block text-sm font-medium text-white/80">Discord del cliente</label>
+                  <input type="text" id="checkout-discord" name="customer_discord" required placeholder="usuario#0000 o username" class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  <p class="mt-1 text-xs text-white/50">Tu usuario de Discord (ej. usuario#0000) para asociar el pedido y el soporte.</p>
+                </div>
+                <div>
+                  <label for="checkout-discord-id" class="block text-sm font-medium text-white/80">Discord User ID <span class="text-white/50 font-normal">(opcional)</span></label>
+                  <input type="text" id="checkout-discord-id" name="customer_discord_id" placeholder="123456789012345678" class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  <p class="mt-1 text-xs text-white/50">Si lo tienes, así podemos mencionarte en el ticket.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Entrega / datos -->
+            <section class="checkout-section">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-white/90">Entrega / datos</h2>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label for="checkout-country" class="block text-sm font-medium text-white/80">País / región</label>
+                  <input type="text" id="checkout-country" name="country" required placeholder="Ej. Estados Unidos" class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label for="checkout-firstname" class="block text-sm font-medium text-white/80">Nombre</label>
+                    <input type="text" id="checkout-firstname" name="firstname" required class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  </div>
+                  <div>
+                    <label for="checkout-lastname" class="block text-sm font-medium text-white/80">Apellido</label>
+                    <input type="text" id="checkout-lastname" name="lastname" required class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  </div>
+                </div>
+                <div>
+                  <label for="checkout-address" class="block text-sm font-medium text-white/80">Dirección</label>
+                  <input type="text" id="checkout-address" name="address" required class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label for="checkout-city" class="block text-sm font-medium text-white/80">Ciudad</label>
+                    <input type="text" id="checkout-city" name="city" required class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  </div>
+                  <div>
+                    <label for="checkout-zip" class="block text-sm font-medium text-white/80">Código postal</label>
+                    <input type="text" id="checkout-zip" name="zip" required class="checkout-input mt-1.5 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Pago: Argentina → Discord; otro → PayPal + Crypto -->
+            <section class="checkout-section" id="checkout-payment-section">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-white/90">Pago</h2>
+
+              <!-- Bloque Argentina: recomendar Discord -->
+              <div id="checkout-payment-argentina" class="checkout-payment-argentina mt-4 hidden">
+                <div class="checkout-argentina-card rounded-xl border border-[#7C3AED]/30 bg-dark-800/80 p-5 shadow-lg">
+                  <p class="text-sm leading-relaxed text-white/90">Para clientes de Argentina, recomendamos abrir un ticket en Discord para coordinar el pago y la entrega de forma más rápida.</p>
+                  <a id="checkout-discord-btn" href="#" target="_blank" rel="noopener noreferrer" class="checkout-btn-discord mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#7C3AED] py-3.5 text-base font-bold text-white shadow-lg transition hover:opacity-95 hover:shadow-[0_6px_20px_rgba(124,58,237,0.4)]">Comprar por Discord</a>
+                </div>
+              </div>
+
+              <!-- Bloque resto de países: PayPal + Crypto -->
+              <div id="checkout-payment-other" class="checkout-payment-other mt-4">
+                <div class="checkout-method-card checkout-paypal-card rounded-xl border border-white/10 bg-white/5 p-4 mb-4">
+                  <p class="text-sm font-medium text-white/90">PayPal</p>
+                  <p class="mt-1 text-xs text-white/60">Paga con tu cuenta PayPal de forma segura. El precio y producto se toman de tu pedido actual.</p>
+                  <div id="paypal-button-container" class="mt-3 min-h-[45px]"></div>
+                </div>
+                <div class="checkout-method-card checkout-crypto-card rounded-xl border border-white/10 bg-white/5 p-4 mb-4">
+                  <p class="text-sm font-medium text-white/90">Pagar con Crypto</p>
+                  <p class="mt-2 text-xs leading-relaxed text-white/65">Realiza tu pago en criptomonedas y luego continúa con tu pedido.</p>
+                  <p class="checkout-crypto-recommend mt-2 text-xs font-medium text-[#7C3AED]/95">Recomendado: pagar con USDT TRC20</p>
+                  <p id="checkout-crypto-amount" class="mt-3 text-sm font-semibold text-[#7C3AED]">Total: — USD</p>
+                  <button type="button" id="cryptoPayButton" class="checkout-method-btn mt-3 w-full rounded-xl border border-[#7C3AED]/40 bg-[#7C3AED]/10 py-3 text-sm font-semibold text-white transition hover:bg-[#7C3AED]/20">Continuar con Crypto</button>
+                </div>
+              </div>
+            </section>
+
+            <div class="pt-2" id="checkout-actions-wrap">
+              <ul class="checkout-trust-list mt-2 space-y-1.5 text-xs text-white/55" aria-label="Garantías">
+                <li class="flex items-center gap-2"><span class="checkout-trust-check text-[#7C3AED]" aria-hidden="true">✔</span> Pago seguro</li>
+                <li class="flex items-center gap-2"><span class="checkout-trust-check text-[#7C3AED]" aria-hidden="true">✔</span> Entrega rápida</li>
+                <li class="flex items-center gap-2"><span class="checkout-trust-check text-[#7C3AED]" aria-hidden="true">✔</span> Soporte por Discord</li>
+              </ul>
+              <div class="checkout-payment-icons mt-4 flex flex-wrap items-center justify-center gap-4" aria-label="Métodos de pago aceptados">
+                <span class="checkout-payment-icon text-xs font-semibold text-white/50">Visa</span>
+                <span class="checkout-payment-icon text-xs font-semibold text-white/50">Mastercard</span>
+                <span class="checkout-payment-icon text-xs font-semibold text-white/50">PayPal</span>
+                <span class="checkout-payment-icon text-xs font-semibold text-white/50">Stripe</span>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Columna derecha: resumen -->
+        <aside class="checkout-summary-column order-1 lg:order-2">
+          <div id="checkout-summary-card" class="checkout-summary-card rounded-2xl border bg-dark-800/80 p-6 shadow-xl backdrop-blur-xl">
+            <h2 class="text-lg font-bold text-white">Resumen del pedido</h2>
+
+            <div id="checkout-summary-content" class="mt-6">
+              <!-- Rellenado por checkout.js -->
+            </div>
+
+            <div id="checkout-summary-empty" class="checkout-empty-state mt-6 hidden rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+              <p class="text-white/60">No hay producto en el pedido.</p>
+              <a href="index.html#packs" class="checkout-btn-store mt-4 inline-block rounded-xl bg-[#7C3AED]/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#7C3AED]/30">Ir a la tienda</a>
+            </div>
+
+            <div id="checkout-totals" class="mt-6 hidden space-y-2 border-t border-white/10 pt-5">
+              <div class="flex justify-between text-sm">
+                <span class="text-white/60">Subtotal</span>
+                <span id="checkout-subtotal" class="font-medium text-white/90">—</span>
+              </div>
+              <div class="checkout-total-row flex justify-between items-baseline pt-1">
+                <span class="checkout-total-label text-base font-bold text-white">Total</span>
+                <span id="checkout-total" class="checkout-total-price text-[#7C3AED]">—</span>
+              </div>
+              <p class="checkout-delivery-msg mt-3 border-t border-white/5 pt-3 text-xs text-white/50">Entrega estimada: 100M → 30-60 min · 250M o más → 1-3 h</p>
+            </div>
+
+            <div id="checkout-coupon-wrap" class="mt-6 hidden">
+              <label for="checkout-coupon" class="block text-sm font-medium text-white/80">Cupón de descuento</label>
+              <div class="mt-2 flex gap-2">
+                <input type="text" id="checkout-coupon" placeholder="Código" class="checkout-input flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                <button type="button" id="checkout-coupon-apply" class="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15">Aplicar</button>
+              </div>
+              <p id="checkout-coupon-msg" class="mt-1.5 min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AWYpiARmUhLVbBIm1h5K0CNIfcNOTNDDiRyrp3Bj5PVz-ii7PnstyZXHu2d9L3EdVLde3kpfC7v6PrLM&currency=USD"></script>
+    <script src="./packs-config.js"></script>
+    <script src="./checkout.js"></script>
+  </body>
+</html>

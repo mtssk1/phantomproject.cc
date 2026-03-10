@@ -1,0 +1,63 @@
+/* ===== Success — Phantom Project ===== */
+.success-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.success-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #0a0614 0%, #0f0a1a 40%, #151020 100%);
+}
+
+.success-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.success-card {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px rgba(0, 0, 0, 0.35), 0 0 80px rgba(124, 58, 237, 0.1);
+}
+
+.success-order-id {
+  font-family: 'Outfit', Inter, system-ui, sans-serif;
+  text-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+  word-break: break-all;
+}
+
+.success-btn-copy:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5);
+}
+
+.success-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.6);
+}
+
+.success-order-summary-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.success-custom-details {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.success-account-block {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.success-account-block p {
+  line-height: 1.5;
+}

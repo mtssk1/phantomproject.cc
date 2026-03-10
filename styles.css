@@ -1,0 +1,375 @@
+/* ===== Background animado: 4 capas ===== */
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* CAPA 1: Base — gradiente + viñeta */
+.bg-base {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0a0614 0%, #0f0a1a 35%, #151020 70%, #0d0818 100%);
+}
+.bg-base::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+/* CAPA 2+4: Canvas (network + partículas) */
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* CAPA 3: Orbes / blobs */
+.bg-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bg-orb-wrap {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform;
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+.bg-orb--1 { background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.5), transparent 70%); }
+.bg-orb--2 { background: radial-gradient(circle at 30% 30%, rgba(99,102,241,0.4), transparent 70%); }
+.bg-orb--3 { background: radial-gradient(circle at 30% 30%, rgba(139,92,246,0.4), transparent 70%); }
+.bg-orb--4 { background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.35), transparent 70%); }
+.bg-orb--5 { background: radial-gradient(circle at 30% 30%, rgba(79,70,229,0.35), transparent 70%); }
+.bg-orb--6 { background: radial-gradient(circle at 30% 30%, rgba(139,92,246,0.3), transparent 70%); }
+.bg-orb--7 { background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.4), transparent 70%); }
+.bg-orb--8 { background: radial-gradient(circle at 30% 30%, rgba(99,102,241,0.3), transparent 70%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb { animation: none !important; }
+}
+.bg-orb--float {
+  animation: bg-orb-float 25s ease-in-out infinite;
+}
+.bg-orb--float-slow {
+  animation: bg-orb-float 35s ease-in-out infinite;
+}
+.bg-orb--float-slower {
+  animation: bg-orb-float 45s ease-in-out infinite;
+}
+.bg-orb--rotate {
+  animation: bg-orb-rotate 40s linear infinite;
+}
+.bg-orb--rotate-slow {
+  animation: bg-orb-rotate 60s linear infinite;
+}
+@keyframes bg-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(2%, -3%) scale(1.05); }
+  50% { transform: translate(-2%, 2%) scale(0.98); }
+  75% { transform: translate(3%, 1%) scale(1.02); }
+}
+@keyframes bg-orb-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Packs: contenedor rectangular vistoso ===== */
+.packs-box {
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px rgba(0,0,0,0.35), 0 0 80px rgba(124,58,237,0.08);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.packs-box:hover {
+  box-shadow: 0 0 0 1px rgba(124,58,237,0.2), 0 24px 56px rgba(0,0,0,0.4), 0 0 100px rgba(124,58,237,0.15);
+}
+
+/* Mismo efecto hover para todos los recuadros (panel ticket, caption, pasos, FAQ, CTA) */
+.ticket-panel,
+.social-caption,
+.recuadro-hover,
+.faq-item {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.ticket-panel:hover,
+.social-caption:hover,
+.recuadro-hover:hover,
+.faq-item:hover {
+  box-shadow: 0 0 0 1px rgba(124,58,237,0.2), 0 24px 56px rgba(0,0,0,0.4), 0 0 100px rgba(124,58,237,0.15);
+}
+
+.shadow-packs {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px rgba(0,0,0,0.35), 0 0 80px rgba(124,58,237,0.08);
+}
+
+/* ===== ¿Por qué Phantom? — tarjetas premium ===== */
+.why-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.why-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(124, 58, 237, 0.1), 0 0 20px rgba(124, 58, 237, 0.06);
+}
+.why-card-icon {
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.18);
+}
+
+/* ===== Buttons (premium, minimal) ===== */
+.btn-primary {
+  background: #7C3AED;
+  color: white;
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.95;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+}
+
+.btn-secondary {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* Botones YouTube y TikTok */
+.btn-youtube {
+  background: #dc2626;
+  transition: opacity 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.btn-youtube:hover {
+  opacity: 0.95;
+  background: #b91c1c;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+}
+.btn-tiktok {
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: opacity 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.btn-tiktok:hover {
+  opacity: 0.95;
+  background: #1a1a1a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Caption redes (glass suave) */
+.social-caption {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.08);
+}
+
+/* ===== Tailwind overrides (shadow from config used in HTML) ===== */
+.shadow-glass {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pack-card:hover .shadow-glass-hover,
+.stat-panel {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.pack-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.32), 0 0 0 1px rgba(124,58,237,0.15);
+}
+
+/* Panel "Abrir ticket": el recuadro se adapta al tamaño de la imagen (sin recortes) */
+.ticket-panel {
+  width: 100%;
+  display: block;
+}
+.ticket-panel-img {
+  display: block;
+  vertical-align: middle;
+}
+
+/* ===== Mobile nav ===== */
+#nav-links.open {
+  display: flex !important;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0 1rem;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(15,10,26,0.98);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* ===== Footer dropdown ===== */
+.footer-dropdown-menu {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.footer-dropdown:hover .footer-dropdown-menu,
+.footer-dropdown:focus-within .footer-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ===== Policy modal ===== */
+.policy-modal[aria-hidden="true"] {
+  display: none;
+}
+.policy-modal[aria-hidden="false"] {
+  display: flex;
+}
+
+/* ===== Coupon modal ===== */
+.coupon-modal[hidden] {
+  display: none !important;
+}
+.coupon-modal:not([hidden]) {
+  display: flex !important;
+}
+
+/* ===== Accessibility ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===== Coupon message states ===== */
+#coupon-message.success { color: rgba(34, 197, 94, 0.95); }
+#coupon-message.error { color: rgba(248, 113, 113, 0.95); }
+
+/* ===== Carrito (drawer lateral) ===== */
+.cart-overlay {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.cart-overlay:not([aria-hidden="true"]) {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.cart-drawer {
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+.cart-drawer.cart-drawer--open {
+  transform: translateX(0);
+}
+
+.cart-close {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.cart-item .cart-qty input,
+.cart-qty-input {
+  -moz-appearance: textfield;
+}
+.cart-item .cart-qty input::-webkit-outer-spin-button,
+.cart-item .cart-qty input::-webkit-inner-spin-button,
+.cart-qty-input::-webkit-outer-spin-button,
+.cart-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.cart-qty-input:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+/* ===== Badge MOST POPULAR ===== */
+.pack-card-title {
+  font-family: 'Outfit', Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.pack-badge {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 1;
+  border-radius: 0.375rem;
+  background: #dc2626;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+}
+
+/* ===== Modal producto ===== */
+.product-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.product-modal.is-open .product-modal-box {
+  transform: scale(1);
+  opacity: 1;
+}
+.product-modal-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+.product-modal-box {
+  transform: scale(0.96);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.product-modal-close {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+@media (max-width: 767px) {
+  .product-modal-body {
+    flex-direction: column;
+  }
+  .product-modal-image img {
+    max-height: 12rem;
+  }
+}
+
+/* ===== Configurador Custom Pack ===== */
+.configurator-option-btn {
+  outline: none;
+}
+.configurator-option-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5);
+}
+.configurator-option-btn--selected {
+  border-color: #7C3AED;
+  background: rgba(124, 58, 237, 0.12);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.3);
+}
+.configurator-option-btn--selected:hover {
+  border-color: #7C3AED;
+  background: rgba(124, 58, 237, 0.18);
+}

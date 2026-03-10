@@ -1,0 +1,211 @@
+/* ===== Checkout — Phantom Project (refinamiento visual) ===== */
+.checkout-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.checkout-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #0a0614 0%, #0f0a1a 35%, #151020 70%, #0d0818 100%);
+}
+
+.checkout-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.checkout-section {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.checkout-section:first-of-type {
+  padding-top: 0;
+}
+
+.checkout-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Barra de confianza */
+.checkout-trust-bar {
+  box-shadow: 0 1px 0 rgba(124, 58, 237, 0.08);
+}
+.checkout-trust-icon {
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.15);
+}
+
+.checkout-payment-icons {
+  letter-spacing: 0.02em;
+}
+.checkout-payment-icon {
+  opacity: 0.85;
+}
+
+/* Micro-bloque de confianza debajo del botón */
+.checkout-trust-list {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+.checkout-trust-check {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* Card del resumen: más premium */
+.checkout-summary-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 48px rgba(124, 58, 237, 0.08);
+  padding: 1.5rem 1.5rem;
+  position: sticky;
+  top: 5rem;
+  border-radius: 1rem;
+}
+
+@media (max-width: 1023px) {
+  .checkout-summary-card {
+    position: static;
+  }
+}
+
+/* Total más protagonista */
+.checkout-total-row {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.checkout-total-label {
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.checkout-total-price {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 24px rgba(124, 58, 237, 0.25);
+}
+
+.checkout-delivery-msg {
+  line-height: 1.45;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+/* Bloque Argentina: card Discord */
+.checkout-argentina-card {
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.15), 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 32px rgba(124, 58, 237, 0.08);
+}
+.checkout-btn-discord:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5);
+}
+
+/* Cards PayPal / Crypto */
+.checkout-method-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.checkout-method-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.1);
+}
+.checkout-crypto-recommend {
+  line-height: 1.4;
+}
+.checkout-method-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.4);
+}
+
+/* Contenedor del botón oficial de PayPal */
+#paypal-button-container {
+  min-height: 45px;
+}
+#paypal-button-container iframe {
+  max-width: 100%;
+}
+
+/* Estado vacío del resumen (no hay producto) */
+.checkout-empty-state {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.checkout-btn-store:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.4);
+}
+
+/* Resumen: imagen más grande y spacing */
+.checkout-summary-product {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.checkout-summary-product img {
+  width: 85px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.checkout-summary-details {
+  min-width: 0;
+  padding-top: 0.125rem;
+}
+
+/* Nombre del pack: jerarquía clara */
+.checkout-summary-details > p:first-child {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.checkout-summary-selections {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.45;
+}
+
+/* Características: más orden y legibilidad */
+.checkout-summary-features {
+  margin-top: 1rem;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.6;
+}
+
+.checkout-summary-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.checkout-summary-features li::before {
+  content: "✔";
+  color: #7C3AED;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Entrega estimada: separada y prolija */
+.checkout-summary-delivery {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+}

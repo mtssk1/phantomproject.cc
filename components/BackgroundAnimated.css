@@ -1,0 +1,18 @@
+/* Animaciones para orbes del background: float + rotación en una sola animación */
+@keyframes bg-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(2%, -3%) scale(1.05) rotate(90deg); }
+  50% { transform: translate(-2%, 2%) scale(0.98) rotate(180deg); }
+  75% { transform: translate(3%, 1%) scale(1.02) rotate(270deg); }
+}
+
+.bg-orb-float { animation: bg-orb-float 25s ease-in-out infinite; }
+.bg-orb-float-slow { animation: bg-orb-float 35s ease-in-out infinite; }
+.bg-orb-float-slower { animation: bg-orb-float 45s ease-in-out infinite; }
+.bg-orb-rotate { animation: bg-orb-float 40s linear infinite; }
+.bg-orb-rotate-slow { animation: bg-orb-float 60s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb-float, .bg-orb-float-slow, .bg-orb-float-slower,
+  .bg-orb-rotate, .bg-orb-rotate-slow { animation: none !important; }
+}
