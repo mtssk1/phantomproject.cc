@@ -153,8 +153,8 @@ function normalizeOrderPayload(obj) {
   if (!obj || typeof obj !== "object") return null;
   var name = obj.productName || obj.name || "";
   var price = obj.productPrice != null ? Number(obj.productPrice) : (obj.price != null ? Number(obj.price) : 0);
-  if (!name && !price && !obj.productImage && !obj.image) return null;
-  return {
+  if (!name && price === 0 && !obj.productImage && !obj.image) return null;
+  var out = {
     productName: name || "Producto",
     productPrice: Number.isNaN(price) ? 0 : price,
     productImage: obj.productImage || obj.image || "",
@@ -163,6 +163,13 @@ function normalizeOrderPayload(obj) {
     productId: obj.productId || obj.id || "",
     customPackSelections: obj.customPackSelections || undefined,
   };
+  if (obj.selectedMoney != null) out.selectedMoney = obj.selectedMoney;
+  if (obj.selectedLevel != null) out.selectedLevel = obj.selectedLevel;
+  if (obj.selectedVehicles != null) out.selectedVehicles = obj.selectedVehicles;
+  if (out.customPackSelections && !out.selectedMoney) out.selectedMoney = out.customPackSelections.dinero;
+  if (out.customPackSelections && !out.selectedLevel) out.selectedLevel = out.customPackSelections.nivel;
+  if (out.customPackSelections && !out.selectedVehicles) out.selectedVehicles = out.customPackSelections.autos;
+  return out;
 }
 
 /**
@@ -171,10 +178,12 @@ function normalizeOrderPayload(obj) {
  */
 function getCheckoutOrder() {
   var order = getOrderFromStorage();
-  if (order && (order.productName || order.name)) {
+  if (order && typeof order === "object" && (order.productName != null || order.name != null || order.productPrice != null || order.price != null)) {
     if (!order.productName && order.name) order.productName = order.name;
     if (order.productPrice == null && order.price != null) order.productPrice = Number(order.price);
     if (!order.productImage && order.image) order.productImage = order.image;
+    if (!order.productName && order.productPrice != null) order.productName = order.productName || "Producto";
+    console.log("[Checkout] Pedido leído desde phantom_checkout:", order.productName, order.productPrice);
     return order;
   }
   try {
@@ -182,6 +191,7 @@ function getCheckoutOrder() {
     if (raw) {
       order = normalizeOrderPayload(JSON.parse(raw));
       if (order) {
+        console.log("[Checkout] Pedido leído desde checkoutProduct (localStorage), sincronizando a phantom_checkout");
         var json = JSON.stringify(order);
         localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
         sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
@@ -189,7 +199,7 @@ function getCheckoutOrder() {
       }
     }
   } catch (e) {
-    console.error("Error leyendo checkoutProduct", e);
+    console.error("[Checkout] Error leyendo checkoutProduct", e);
   }
   var params = new URLSearchParams(typeof window !== "undefined" && window.location ? window.location.search : "");
   var name = params.get("name");
@@ -207,9 +217,11 @@ function getCheckoutOrder() {
       var json = JSON.stringify(order);
       localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
       sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+      console.log("[Checkout] Pedido construido desde URL, guardado en storage");
       return order;
     }
   }
+  console.log("[Checkout] No se encontró pedido (ni phantom_checkout ni checkoutProduct ni URL)");
   return null;
 }
 
@@ -675,18 +687,22 @@ function renderCheckoutSummary(order) {
   var totalEl = document.getElementById("checkout-total");
   var cryptoAmountEl = document.getElementById("checkout-crypto-amount");
 
-  if (!order || !order.productName) {
+  var hasProduct = order && (order.productName || (order.productPrice != null && order.productPrice > 0));
+  if (!hasProduct) {
     if (content) content.innerHTML = "";
     if (empty) empty.classList.remove("hidden");
     if (totals) totals.classList.add("hidden");
     if (couponWrap) couponWrap.classList.add("hidden");
     if (cryptoAmountEl) cryptoAmountEl.textContent = "Total: — USD";
+    console.log("[Checkout] renderCheckoutSummary: sin producto, mostrando estado vacío");
     return null;
   }
+  if (!order.productName) order.productName = "Producto";
 
   if (empty) empty.classList.add("hidden");
   if (totals) totals.classList.remove("hidden");
   if (couponWrap) couponWrap.classList.remove("hidden");
+  console.log("[Checkout] renderCheckoutSummary: pintando resumen para", order.productName, order.productPrice);
 
   var unitPrice = Number(order.productPrice) || 0;
   var quantity = getOrderQuantity();
@@ -737,18 +753,15 @@ function renderCheckoutSummary(order) {
  * Obtiene el pedido (getCheckoutOrder) y renderiza el resumen. Si no hay pedido, muestra estado vacío.
  */
 function renderSummary() {
-  var content = document.getElementById("checkout-summary-content");
-  var empty = document.getElementById("checkout-summary-empty");
-  var totals = document.getElementById("checkout-totals");
-  var couponWrap = document.getElementById("checkout-coupon-wrap");
-
   var data = null;
   try {
     data = getCheckoutOrder();
   } catch (e) {
-    console.error("renderSummary getCheckoutOrder:", e);
+    console.error("[Checkout] renderSummary getCheckoutOrder:", e);
   }
-  return renderCheckoutSummary(data);
+  var result = renderCheckoutSummary(data);
+  console.log("[Checkout] renderSummary ejecutado, hay pedido:", !!data);
+  return result;
 }
 
 function setupCoupon() {
@@ -796,19 +809,22 @@ function setupForm() {
 }
 
 function init() {
+  console.log("[Checkout] init: cargando checkout");
   try {
-    const data = getCheckoutData();
     renderSummary();
     setupCoupon();
     setupForm();
     setupCountryPaymentToggle();
     setupPayPalCryptoDiscord();
+    console.log("[Checkout] init: listo");
   } catch (err) {
-    console.error("Checkout init error:", err);
-    const empty = document.getElementById("checkout-summary-empty");
-    const content = document.getElementById("checkout-summary-content");
+    console.error("[Checkout] init error:", err);
+    var empty = document.getElementById("checkout-summary-empty");
+    var content = document.getElementById("checkout-summary-content");
+    var totals = document.getElementById("checkout-totals");
     if (empty) empty.classList.remove("hidden");
     if (content) content.innerHTML = "";
+    if (totals) totals.classList.add("hidden");
   }
 }
 

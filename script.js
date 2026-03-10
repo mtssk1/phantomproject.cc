@@ -500,15 +500,43 @@ function formatMoney(cents, currency) {
 const CHECKOUT_STORAGE_KEY = "phantom_checkout";
 
 function saveCheckoutAndRedirect(payload) {
+  if (!payload || (typeof payload !== "object")) {
+    console.error("[Checkout] saveCheckoutAndRedirect: payload inválido", payload);
+    return;
+  }
+  var base = {
+    productName: payload.productName != null ? String(payload.productName) : "",
+    productPrice: payload.productPrice != null ? Number(payload.productPrice) : 0,
+    productImage: payload.productImage != null ? String(payload.productImage) : "",
+    quantity: payload.quantity != null ? Math.max(1, Math.floor(Number(payload.quantity))) : 1,
+  };
+  if (payload.productType != null) base.productType = payload.productType;
+  if (payload.productId != null) base.productId = payload.productId;
+  if (payload.customPackSelections != null) base.customPackSelections = payload.customPackSelections;
+  if (payload.selectedMoney != null) base.selectedMoney = payload.selectedMoney;
+  if (payload.selectedLevel != null) base.selectedLevel = payload.selectedLevel;
+  if (payload.selectedVehicles != null) base.selectedVehicles = payload.selectedVehicles;
+  if (base.customPackSelections && !base.selectedMoney) base.selectedMoney = base.customPackSelections.dinero;
+  if (base.customPackSelections && !base.selectedLevel) base.selectedLevel = base.customPackSelections.nivel;
+  if (base.customPackSelections && !base.selectedVehicles) base.selectedVehicles = base.customPackSelections.autos;
+
+  console.log("[Checkout] Payload armado:", base);
   try {
-    localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(payload));
-    localStorage.setItem("checkoutProduct", JSON.stringify(payload));
-  } catch (_) {}
+    var json = JSON.stringify(base);
+    localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+    localStorage.setItem("checkoutProduct", json);
+    sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+    sessionStorage.setItem("checkoutProduct", json);
+    console.log("[Checkout] Guardado en phantom_checkout y checkoutProduct (localStorage + sessionStorage)");
+  } catch (e) {
+    console.error("[Checkout] Error al guardar en storage:", e);
+  }
+  console.log("[Checkout] Redirigiendo a checkout.html");
   window.location.href = "checkout.html";
 }
 
 function buildCheckoutPayloadFromPack(pack, price, customPackSelections) {
-  return {
+  var payload = {
     productName: pack.title,
     productImage: pack.image || "",
     productPrice: price != null ? Number(price) : pack.price,
@@ -517,12 +545,18 @@ function buildCheckoutPayloadFromPack(pack, price, customPackSelections) {
     productId: pack.id || "",
     customPackSelections: customPackSelections || undefined,
   };
+  if (customPackSelections) {
+    payload.selectedMoney = customPackSelections.dinero;
+    payload.selectedLevel = customPackSelections.nivel;
+    payload.selectedVehicles = customPackSelections.autos;
+  }
+  return payload;
 }
 
 function buildCheckoutPayloadFromCartItem(item) {
-  const isCustom = !!(item.customPackSelections || (item.id && String(item.id).startsWith("custom")));
-  const qty = item.quantity != null ? Math.max(1, Math.floor(Number(item.quantity))) : 1;
-  return {
+  var isCustom = !!(item.customPackSelections || (item.id && String(item.id).startsWith("custom")));
+  var qty = item.quantity != null ? Math.max(1, Math.floor(Number(item.quantity))) : 1;
+  var payload = {
     productName: item.name,
     productImage: item.image || "",
     productPrice: Number(item.price) || 0,
@@ -531,11 +565,17 @@ function buildCheckoutPayloadFromCartItem(item) {
     productId: isCustom ? "custom" : (item.id || ""),
     customPackSelections: item.customPackSelections || undefined,
   };
+  if (item.customPackSelections) {
+    payload.selectedMoney = item.customPackSelections.dinero;
+    payload.selectedLevel = item.customPackSelections.nivel;
+    payload.selectedVehicles = item.customPackSelections.autos;
+  }
+  return payload;
 }
 
 /** Botón "Finalizar compra" del carrito: guarda primer ítem y redirige a checkout.html */
 function applyCheckoutButton() {
-  const btn = document.getElementById("cart-checkout");
+  var btn = document.getElementById("cart-checkout");
   if (!btn) return;
   btn.textContent = "Finalizar compra";
   btn.href = "checkout.html";
@@ -543,16 +583,17 @@ function applyCheckoutButton() {
   btn.addEventListener("click", function goToCheckout(e) {
     e.preventDefault();
     if (isShopifyEnabled()) {
-      fetchCartShopify().then((cart) => {
-        const first = cart && cart.items && cart.items[0];
+      fetchCartShopify().then(function (cart) {
+        var first = cart && cart.items && cart.items[0];
         if (first) {
-          const qty = first.quantity != null ? Math.max(1, Math.floor(Number(first.quantity))) : 1;
+          var qty = first.quantity != null ? Math.max(1, Math.floor(Number(first.quantity))) : 1;
           saveCheckoutAndRedirect({
             productName: first.title,
             productImage: first.image || "",
             productPrice: (first.price || 0) / 100,
             quantity: qty,
             productType: "normal",
+            productId: first.variant_id || "",
           });
         } else {
           window.location.href = "checkout.html";
@@ -560,8 +601,8 @@ function applyCheckoutButton() {
       });
       return;
     }
-    const cart = getCart();
-    const first = cart[0];
+    var cart = getCart();
+    var first = cart[0];
     if (first) {
       saveCheckoutAndRedirect(buildCheckoutPayloadFromCartItem(first));
     } else {
