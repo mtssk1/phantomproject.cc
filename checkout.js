@@ -329,65 +329,93 @@ function getCheckoutTotalForPayment() {
 }
 
 /**
- * Inicializa el botón oficial de PayPal (SDK cargado en checkout.html).
- * Solo renderiza si el DOM está listo, existe pedido válido y el contenedor existe.
- * El monto se envía con punto decimal (ej: "249.90") para PayPal.
+ * Obtiene el monto para PayPal: string con dos decimales y punto (ej: "39.98").
+ * Origen: getPaymentAmountString() → #checkout-total (dataset o texto) → "39.98".
+ */
+function getPayPalAmountString() {
+  try {
+    var fromOrder = getPaymentAmountString();
+    if (fromOrder && /^\d+(\.\d{1,2})?$/.test(fromOrder)) return fromOrder;
+  } catch (_) {}
+  var totalEl = document.getElementById("checkout-total");
+  if (totalEl) {
+    if (totalEl.dataset && totalEl.dataset.finalPrice) {
+      var n = Number(totalEl.dataset.finalPrice);
+      if (!Number.isNaN(n) && n >= 0) return n.toFixed(2);
+    }
+    if (totalEl.textContent) {
+      var parsed = totalEl.textContent.replace(/[^\d.,]/g, "").replace(",", ".");
+      if (parsed && !Number.isNaN(Number(parsed))) return Number(parsed).toFixed(2);
+    }
+  }
+  return "39.98";
+}
+
+/**
+ * Inicializa el botón oficial de PayPal en #paypal-button-container.
+ * Monto desde pedido o #checkout-total o "39.98". Mantiene Supabase, Discord y success.
  */
 function initPayPalButtons() {
-  const container = document.getElementById("paypal-button-container");
+  var container = document.getElementById("paypal-button-container");
   if (!container) return;
 
-  ensureCheckoutOrderId();
-  const order = getOrderFromStorage();
+  if (!window.paypal || typeof window.paypal.Buttons !== "function") {
+    container.innerHTML = '<p class="text-sm text-white/50">PayPal no está disponible. Recargá la página.</p>';
+    return;
+  }
+
+  var order = getOrderFromStorage();
   if (!order || !order.productName) {
     container.innerHTML = '<p class="text-sm text-white/50">No hay pedido activo. Agregá un producto desde la tienda.</p>';
     return;
   }
 
-  if (!window.paypal) {
-    container.innerHTML = '<p class="text-sm text-white/50">PayPal no está disponible. Recargá la página.</p>';
-    return;
-  }
-
+  ensureCheckoutOrderId();
   container.innerHTML = "";
 
-  const paypalAmount = getPaymentAmountString();
-
   try {
-    if (typeof window.paypal.Buttons !== "function") {
-      throw new Error("PayPal Buttons no disponible");
-    }
-    window.paypal
-      .Buttons({
-        createOrder: async function (data, actions) {
-          const customer = getCheckoutCustomerData();
-          if (!customer.customer_email || !customer.customer_discord) {
-            alert("Completá correo electrónico y Discord del cliente antes de pagar.");
-            throw new Error("Faltan datos de contacto");
-          }
-          const synced = await syncOrderToBackend();
-          if (!synced) console.warn("No se pudo sincronizar el pedido con el servidor.");
+    window.paypal.Buttons({
+      createOrder: function (data, actions) {
+        var total = getPayPalAmountString();
+        var totalEl = document.getElementById("checkout-total");
+        if (totalEl && totalEl.textContent) {
+          var parsed = totalEl.textContent.replace(/[^\d.,]/g, "").replace(",", ".");
+          if (parsed) total = Number(parsed).toFixed(2);
+        }
+        var customer = getCheckoutCustomerData();
+        if (!customer.customer_email || !customer.customer_discord) {
+          alert("Completá correo electrónico y Discord del cliente antes de pagar.");
+          throw new Error("Faltan datos de contacto");
+        }
+        return Promise.resolve().then(function () {
+          return syncOrderToBackend();
+        }).then(function () {
           return actions.order.create({
             purchase_units: [{
               description: PAYPAL_SAFE_DESCRIPTION,
               amount: {
                 currency_code: PAYPAL_CURRENCY,
-                value: paypalAmount
+                value: total
               }
-            }]
+            }];
           });
-        },
-        onApprove: function (data, actions) {
-          return actions.order.capture().then(function () {
+        });
+      },
+      onApprove: function (data, actions) {
+        return actions.order.capture().then(function (details) {
+          if (typeof completeOrderAndRedirectToSuccess === "function") {
             completeOrderAndRedirectToSuccess("paypal", { paypalOrderId: data.orderID });
-          });
-        },
-        onError: function (err) {
-          console.error("PayPal error:", err);
-          alert("Hubo un error al iniciar el pago con PayPal.");
-        }
-      })
-      .render("#paypal-button-container");
+          } else {
+            alert("Pago completado correctamente.");
+            window.location.href = typeof SUCCESS_PAGE_URL !== "undefined" ? SUCCESS_PAGE_URL : "/success.html";
+          }
+        });
+      },
+      onError: function (err) {
+        console.error("PayPal error:", err);
+        alert("Hubo un error al iniciar el pago con PayPal.");
+      }
+    }).render("#paypal-button-container");
   } catch (err) {
     console.error("PayPal render error:", err);
     container.innerHTML = '<p class="text-sm text-white/50">No se pudo cargar el botón de PayPal. Recargá la página.</p>';
