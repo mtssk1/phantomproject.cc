@@ -90,7 +90,7 @@ window.PACKS_CONFIG = {
       id: "100m",
       title: "100M Starter Money Pack",
       shortDescription: "100M GTA$, rango 50, 5 vehículos y outfits. Listo para jugar.",
-      price: 14.99,
+      price: 1,
       image: "./100m.png",
       description:
         "Sumérgete en GTA 5 Online con una cuenta preparada para comenzar a dominar Los Santos desde el primer momento. Este pack incluye dinero, vehículos y equipamiento inicial para disfrutar el juego sin tener que pasar horas grindeando.",
