@@ -118,15 +118,16 @@ async function syncOrderToBackend() {
     selected_vehicles: order.customPackSelections ? order.customPackSelections.autos : undefined,
   };
   try {
-    const url = (API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE) + "/create-order";
-    const res = await fetch(url, {
+    var url = (API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE) + "/create-order";
+    console.log("[Checkout] Enviando a create-order:", payload.order_id, payload.product_name, payload.total);
+    var res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     return res.ok;
   } catch (e) {
-    console.error("syncOrderToBackend:", e);
+    console.error("[Checkout] syncOrderToBackend:", e);
     return false;
   }
 }
@@ -231,31 +232,40 @@ function getCheckoutData() {
 }
 
 /**
- * Devuelve la cantidad del pedido (por defecto 1).
+ * Devuelve la cantidad del pedido (por defecto 1). Usa phantom_checkout (ya sincronizado por getCheckoutOrder).
  */
 function getOrderQuantity() {
-  const order = getOrderFromStorage();
+  var order = getOrderFromStorage();
   if (!order) return 1;
-  const q = order.quantity != null ? Math.max(1, Math.floor(Number(order.quantity))) : 1;
+  var q = order.quantity != null ? Math.max(1, Math.floor(Number(order.quantity))) : 1;
   return Number.isNaN(q) || q < 1 ? 1 : q;
 }
 
 /**
  * Devuelve el total numérico del pedido: (precio unitario * cantidad), con cupón si aplica.
- * Reutilizar en resumen, PayPal, Crypto y success.
  */
 function getOrderTotal() {
-  const order = getOrderFromStorage();
-  if (!order || order.productPrice == null) return 0;
-  const unitPrice = Number(order.productPrice);
+  var order = getOrderFromStorage();
+  if (!order || (order.productPrice == null && order.price == null)) return 0;
+  var unitPrice = Number(order.productPrice != null ? order.productPrice : order.price);
   if (Number.isNaN(unitPrice) || unitPrice < 0) return 0;
-  const qty = getOrderQuantity();
-  let total = Math.round(unitPrice * qty * 100) / 100;
+  var qty = getOrderQuantity();
+  var total = Math.round(unitPrice * qty * 100) / 100;
   if (Number.isNaN(total) || total < 0) return 0;
   if (window.checkoutDiscountApplied) {
     total = Math.round((total * (1 - COUPON_DISCOUNT_PERCENT / 100)) * 100) / 100;
   }
   return total;
+}
+
+/**
+ * Total para checkout: pedido real o fallback 39.98. Usar en resumen, PayPal y Crypto.
+ */
+function getCheckoutTotal() {
+  var total = getOrderTotal();
+  if (total != null && !Number.isNaN(total) && total > 0) return total;
+  console.log("[Checkout] getCheckoutTotal: sin pedido válido, fallback 39.98");
+  return 39.98;
 }
 
 /** Formatea el total en USD para mostrar en resumen, PayPal, Crypto. */
@@ -264,23 +274,21 @@ function formatOrderTotal(total) {
 }
 
 /**
- * Total para PayPal: finalTotal = productPrice * quantity (con cupón si aplica); paypalAmount = finalTotal.toFixed(2).
- * Siempre string con punto decimal (ej: "249.90") para PayPal LIVE.
+ * Total para PayPal: string con dos decimales y punto (ej: "249.90"). Usa getCheckoutTotal (fallback 39.98).
  */
 function getPaymentAmountString() {
-  const order = getOrderFromStorage();
-  if (!order || order.productPrice == null) return "0.00";
-  const finalTotal = getOrderTotal();
-  const num = Number(finalTotal);
-  if (Number.isNaN(num) || num < 0) return "0.00";
+  var total = getCheckoutTotal();
+  var num = Number(total);
+  if (Number.isNaN(num) || num < 0) return "39.98";
+  console.log("[Checkout] getPaymentAmountString:", num.toFixed(2));
   return num.toFixed(2);
 }
 
-/** Total numérico para APIs (PayPal amount.value, NOWPayments price_amount). */
+/** Total numérico para PayPal/Crypto. Usa getCheckoutTotal (fallback 39.98). */
 function getPaymentAmountNumber() {
-  const total = getOrderTotal();
-  const num = Number(total);
-  if (Number.isNaN(num) || num < 0) return 0;
+  var total = getCheckoutTotal();
+  var num = Number(total);
+  if (Number.isNaN(num) || num < 0) return 39.98;
   return Math.round(num * 100) / 100;
 }
 
@@ -357,14 +365,17 @@ function updatePaymentByCountry() {
  * paymentMeta opcional: { paypalOrderId, cryptoInvoiceId } para confirm-payment.
  */
 function completeOrderAndRedirectToSuccess(paymentMethod, paymentMeta) {
-  const data = getOrderFromStorage();
-  if (!data || !data.productName) {
+  var data = getOrderFromStorage();
+  if (!data || (!data.productName && !data.name && (data.productPrice == null && data.price == null))) {
     alert("No hay producto en el pedido. Volvé a la tienda.");
     return false;
   }
-  const orderId = data.orderId || ensureCheckoutOrderId() || generateOrderId();
-  const finalPrice = getOrderTotal();
-  const quantity = getOrderQuantity();
+  var productName = data.productName || data.name || "Producto";
+  if (!data.productName) data.productName = productName;
+  if (data.productPrice == null && data.price != null) data.productPrice = Number(data.price);
+  var orderId = data.orderId || ensureCheckoutOrderId() || generateOrderId();
+  var finalPrice = getOrderTotal();
+  var quantity = getOrderQuantity();
   const meta = paymentMeta || {};
   const successPayload = {
     orderId,
@@ -506,15 +517,16 @@ function initPayPalButtons() {
  * Evita renderizar antes de que el SDK esté listo. No vuelve a renderizar si ya hay botón.
  */
 function initPayPalButtonsWhenReady() {
-  const container = document.getElementById("paypal-button-container");
+  var container = document.getElementById("paypal-button-container");
   if (!container) return;
   if (container.querySelector("iframe")) return;
 
-  const order = getOrderFromStorage();
-  if (!order || !order.productName) {
+  var order = getCheckoutOrder();
+  if (!order || (!order.productName && (order.productPrice == null || order.productPrice <= 0))) {
     container.innerHTML = '<p class="text-sm text-white/50">No hay pedido activo. Agregá un producto desde la tienda.</p>';
     return;
   }
+  if (!order.productName) order.productName = "Producto";
 
   if (window.paypal) {
     initPayPalButtons();
@@ -545,30 +557,35 @@ function initPayPalButtonsWhenReady() {
  * OrderId se asegura ANTES de crear la invoice; success.html solo lee ese mismo valor (no lo regenera).
  */
 async function createNowPaymentsInvoice() {
-  ensureCheckoutOrderId();
-  const order = getOrderFromStorage();
-  if (!order || !order.productName) {
+  console.log("[Checkout] Crypto: click en Continuar con Crypto");
+  var order = getCheckoutOrder();
+  if (!order || (!order.productName && (order.productPrice == null || order.price == null))) {
+    console.warn("[Checkout] Crypto: no hay pedido válido");
     alert("No hay producto en el pedido. Agregá un producto desde la tienda.");
     return;
   }
-  const customer = getCheckoutCustomerData();
+  if (!order.productName) order.productName = order.name || "Producto";
+  ensureCheckoutOrderId();
+  var customer = getCheckoutCustomerData();
   if (!customer.customer_email || !customer.customer_discord) {
     alert("Completá correo electrónico y Discord del cliente antes de continuar.");
     return;
   }
 
-  const synced = await syncOrderToBackend();
-  if (!synced) console.warn("No se pudo sincronizar el pedido con el servidor.");
+  var synced = await syncOrderToBackend();
+  if (!synced) console.warn("[Checkout] Crypto: no se pudo sincronizar el pedido con el servidor.");
 
-  const priceAmount = getPaymentAmountNumber();
+  var priceAmount = getPaymentAmountNumber();
+  console.log("[Checkout] Crypto: total calculado", priceAmount, "USD");
   if (!priceAmount || priceAmount <= 0) {
-    alert("El total del pedido no es válido.");
+    alert("El total del pedido no es válido. Revisá el resumen del pedido.");
     return;
   }
 
-  const orderId = order.orderId;
-  const quantity = getOrderQuantity();
-  const orderDescription = quantity > 1 ? (order.productName || "Phantom Project Order") + " x" + quantity : (order.productName || "Phantom Project Order");
+  var orderId = order.orderId || ensureCheckoutOrderId();
+  var quantity = getOrderQuantity();
+  var orderDescription = quantity > 1 ? (order.productName || "Phantom Project Order") + " x" + quantity : (order.productName || "Phantom Project Order");
+  console.log("[Checkout] Crypto: enviando a NOWPayments — order_id:", orderId, "price_amount:", priceAmount, "producto:", order.productName);
 
   const successPayload = {
     orderId: orderId,
@@ -590,7 +607,7 @@ async function createNowPaymentsInvoice() {
     sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
   } catch (_) {}
 
-  const body = {
+  var body = {
     price_amount: Number(priceAmount),
     price_currency: "usd",
     order_id: orderId,
@@ -621,7 +638,7 @@ async function createNowPaymentsInvoice() {
       });
     })
     .then(function (data) {
-      const invoiceUrl = data.invoice_url;
+      var invoiceUrl = data.invoice_url;
       if (invoiceUrl) {
         if (data.id) successPayload.crypto_invoice_id = data.id;
         try { localStorage.setItem(SUCCESS_STORAGE_KEY, JSON.stringify(successPayload)); } catch (_) {}
@@ -631,10 +648,14 @@ async function createNowPaymentsInvoice() {
       }
     })
     .catch(function (err) {
-      console.error("NOWPayments error:", err);
+      console.error("[Checkout] NOWPayments error:", err);
       alert(err.message || "No se pudo crear el enlace de pago. Intentá de nuevo o usá otro método.");
       try {
-        localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(order));
+        var currentOrder = getCheckoutOrder();
+        if (currentOrder) {
+          localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(currentOrder));
+          sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(currentOrder));
+        }
       } catch (_) {}
       if (cryptoBtn) {
         cryptoBtn.disabled = false;
@@ -760,7 +781,8 @@ function renderSummary() {
     console.error("[Checkout] renderSummary getCheckoutOrder:", e);
   }
   var result = renderCheckoutSummary(data);
-  console.log("[Checkout] renderSummary ejecutado, hay pedido:", !!data);
+  var total = getCheckoutTotal();
+  console.log("[Checkout] renderSummary ejecutado, hay pedido:", !!data, "total calculado:", total);
   return result;
 }
 

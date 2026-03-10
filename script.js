@@ -519,8 +519,9 @@ function saveCheckoutAndRedirect(payload) {
   if (base.customPackSelections && !base.selectedMoney) base.selectedMoney = base.customPackSelections.dinero;
   if (base.customPackSelections && !base.selectedLevel) base.selectedLevel = base.customPackSelections.nivel;
   if (base.customPackSelections && !base.selectedVehicles) base.selectedVehicles = base.customPackSelections.autos;
+  if (!base.productName && (base.productPrice > 0 || payload.name)) base.productName = payload.name || "Producto";
 
-  console.log("[Checkout] Payload armado:", base);
+  console.log("[Checkout] Payload armado en tienda:", base);
   try {
     var json = JSON.stringify(base);
     localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
