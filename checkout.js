@@ -393,6 +393,7 @@ function completeOrderAndRedirectToSuccess(paymentMethod, paymentMeta) {
   var orderId = data.orderId || ensureCheckoutOrderId() || generateOrderId();
   var finalPrice = getOrderTotal();
   var quantity = getOrderQuantity();
+  var customer = getCheckoutCustomerData();
   const meta = paymentMeta || {};
   const successPayload = {
     orderId,
@@ -409,6 +410,9 @@ function completeOrderAndRedirectToSuccess(paymentMethod, paymentMeta) {
     selectedMoney: data.customPackSelections ? data.customPackSelections.dinero : null,
     selectedLevel: data.customPackSelections ? data.customPackSelections.nivel : null,
     selectedVehicles: data.customPackSelections ? data.customPackSelections.autos : null,
+    customer_email: customer.customer_email || "",
+    customer_discord: customer.customer_discord || "",
+    customer_discord_id: customer.customer_discord_id || null,
   };
   try {
     localStorage.setItem(SUCCESS_STORAGE_KEY, JSON.stringify(successPayload));

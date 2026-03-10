@@ -33,11 +33,19 @@ export default async function handler(req, res) {
   const quantity = body.quantity != null ? String(body.quantity) : "—";
   const total = body.total != null ? String(body.total) : "—";
   const paymentMethod = body.paymentMethod != null ? String(body.paymentMethod) : "—";
+  const customerEmail = body.customer_email != null ? String(body.customer_email) : "—";
+  const customerDiscord = body.customer_discord != null ? String(body.customer_discord) : "—";
+  const customerDiscordId = body.customer_discord_id ? String(body.customer_discord_id).trim() : "";
+  const discordIdLine = customerDiscordId ? ` | ID: ${customerDiscordId}` : "";
 
   const content = [
     "**PHANTOM PROJECT - NUEVA COMPRA**",
     "",
     `Order ID: ${orderId}`,
+    "**Cliente:**",
+    `Email: ${customerEmail}`,
+    `Discord: ${customerDiscord}${discordIdLine}`,
+    "",
     `Producto: ${productName}`,
     `Cantidad: ${quantity}`,
     `Total: ${total} USD`,

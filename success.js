@@ -67,6 +67,9 @@ async function sendOrderToDiscordFallback(data) {
         quantity: data.quantity != null ? data.quantity : "—",
         total: data.productPrice != null ? data.productPrice : (data.total != null ? data.total : "—"),
         paymentMethod: data.paymentMethod || data.payment_method || "—",
+        customer_email: data.customer_email || "",
+        customer_discord: data.customer_discord || "",
+        customer_discord_id: data.customer_discord_id || "",
       }),
     });
     return res.ok;

@@ -95,22 +95,28 @@ export async function createTicketChannel(order) {
 }
 
 export function formatInternalMessage(order) {
+  const discordLine = order.customer_discord || "—";
+  const discordIdPart = order.customer_discord_id ? ` | ID: ${order.customer_discord_id}` : "";
   const lines = [
     "**PHANTOM PROJECT - NUEVA COMPRA**",
     "",
     `Order ID: ${order.order_id || "—"}`,
+    `**Cliente:**`,
+    `Email: ${order.customer_email || "—"}`,
+    `Discord: ${discordLine}${discordIdPart}`,
+    "",
     `Producto: ${order.product_name || "—"}`,
     `Cantidad: ${order.quantity ?? "—"}`,
     `Total: ${order.total ?? "—"} USD`,
     `Método de pago: ${order.payment_method || "—"}`,
-    `Email: ${order.customer_email || "—"}`,
-    `Discord: ${order.customer_discord || "—"}${order.customer_discord_id ? ` (ID: ${order.customer_discord_id})` : ""}`,
     `Estado: ${order.payment_status || "paid"}`,
     "",
     "**Detalles:**",
     `- Dinero: ${order.selected_money || "—"}`,
     `- Nivel: ${order.selected_level || "—"}`,
     `- Vehículos: ${order.selected_vehicles || "—"}`,
+    "",
+    "Cliente, abre ticket en Discord y envía tus datos usando este ID del pedido."
   ];
   return lines.join("\n");
 }
