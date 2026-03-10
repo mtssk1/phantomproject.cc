@@ -133,14 +133,18 @@ async function syncOrderToBackend() {
 }
 
 /**
- * Carga el pedido desde storage. Prioriza localStorage, luego sessionStorage.
- * Reutilizable para resumen, PayPal, Crypto y total. Clave: phantom_checkout.
+ * Carga el pedido desde storage. Prioriza phantom_checkout (local + session), luego checkoutProduct.
+ * Así el resumen y PayPal/Crypto encuentran el pedido aunque solo se haya guardado en una clave.
  */
 function getOrderFromStorage() {
   try {
     var raw = localStorage.getItem(CHECKOUT_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
     raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+    raw = localStorage.getItem("checkoutProduct");
+    if (raw) return JSON.parse(raw);
+    raw = sessionStorage.getItem("checkoutProduct");
     return raw ? JSON.parse(raw) : null;
   } catch (_) {
     return null;
@@ -183,8 +187,16 @@ function getCheckoutOrder() {
     if (!order.productName && order.name) order.productName = order.name;
     if (order.productPrice == null && order.price != null) order.productPrice = Number(order.price);
     if (!order.productImage && order.image) order.productImage = order.image;
-    if (!order.productName && order.productPrice != null) order.productName = order.productName || "Producto";
-    console.log("[Checkout] Pedido leído desde phantom_checkout:", order.productName, order.productPrice);
+    if (!order.productName && (order.productPrice != null || order.price != null)) order.productName = order.productName || order.name || "Producto";
+    console.log("[Checkout] Pedido leído:", order.productName, order.productPrice);
+    var hadPhantom = !!localStorage.getItem(CHECKOUT_STORAGE_KEY);
+    if (!hadPhantom) {
+      try {
+        var json = JSON.stringify(order);
+        localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+        sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+      } catch (_) {}
+    }
     return order;
   }
   try {
