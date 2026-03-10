@@ -500,24 +500,20 @@ function initPayPalButtons() {
           alert("Completá correo electrónico y Discord del cliente antes de pagar.");
           throw new Error("Faltan datos de contacto");
         }
-        return Promise.resolve()
-          .then(function () { return syncOrderToBackend(); })
-          .then(function (ok) {
-            if (!ok) {
-              console.error("[Checkout] create-order falló; no se guardó el pedido en la base.");
-              alert("No se pudo registrar el pedido. Revisá tu conexión y probá de nuevo.");
-              throw new Error("create-order falló");
-            }
-            return actions.order.create({
+        syncOrderToBackend().then(function (ok) {
+          if (!ok) console.warn("[Checkout] create-order no respondió OK; el pago sigue. Revisá consola o Vercel logs.");
+        }).catch(function (e) {
+          console.warn("[Checkout] syncOrderToBackend error:", e);
+        });
+        return actions.order.create({
           purchase_units: [{
             description: PAYPAL_SAFE_DESCRIPTION,
             amount: {
               currency_code: PAYPAL_CURRENCY,
               value: total
             }
-            }]
-            });
-          });
+          }]
+        });
       },
       onApprove: function (data, actions) {
         return actions.order.capture().then(function (details) {
