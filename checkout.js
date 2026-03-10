@@ -125,7 +125,12 @@ async function syncOrderToBackend() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return res.ok;
+    var ok = res.ok;
+    if (!ok) {
+      var errText = await res.text();
+      console.error("[Checkout] create-order respuesta:", res.status, errText);
+    }
+    return ok;
   } catch (e) {
     console.error("[Checkout] syncOrderToBackend:", e);
     return false;
@@ -491,18 +496,24 @@ function initPayPalButtons() {
           alert("Completá correo electrónico y Discord del cliente antes de pagar.");
           throw new Error("Faltan datos de contacto");
         }
-        syncOrderToBackend().catch(function (e) {
-          console.warn("[Checkout] syncOrderToBackend falló (el pago sigue):", e);
-        });
-        return actions.order.create({
+        return Promise.resolve()
+          .then(function () { return syncOrderToBackend(); })
+          .then(function (ok) {
+            if (!ok) {
+              console.error("[Checkout] create-order falló; no se guardó el pedido en la base.");
+              alert("No se pudo registrar el pedido. Revisá tu conexión y probá de nuevo.");
+              throw new Error("create-order falló");
+            }
+            return actions.order.create({
           purchase_units: [{
             description: PAYPAL_SAFE_DESCRIPTION,
             amount: {
               currency_code: PAYPAL_CURRENCY,
               value: total
             }
-          }]
-        });
+            }]
+            });
+          });
       },
       onApprove: function (data, actions) {
         return actions.order.capture().then(function (details) {
