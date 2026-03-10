@@ -137,7 +137,7 @@ async function syncOrderToBackend() {
  */
 function getOrderFromStorage() {
   try {
-    let raw = localStorage.getItem(CHECKOUT_STORAGE_KEY);
+    var raw = localStorage.getItem(CHECKOUT_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
     raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -146,9 +146,76 @@ function getOrderFromStorage() {
   }
 }
 
-/** Alias para compatibilidad. Usa getOrderFromStorage() en código nuevo. */
+/**
+ * Normaliza un objeto de pedido para que tenga productName, productPrice, productImage, quantity, etc.
+ */
+function normalizeOrderPayload(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  var name = obj.productName || obj.name || "";
+  var price = obj.productPrice != null ? Number(obj.productPrice) : (obj.price != null ? Number(obj.price) : 0);
+  if (!name && !price && !obj.productImage && !obj.image) return null;
+  return {
+    productName: name || "Producto",
+    productPrice: Number.isNaN(price) ? 0 : price,
+    productImage: obj.productImage || obj.image || "",
+    quantity: obj.quantity != null ? Math.max(1, Math.floor(Number(obj.quantity))) : 1,
+    productType: obj.productType || "normal",
+    productId: obj.productId || obj.id || "",
+    customPackSelections: obj.customPackSelections || undefined,
+  };
+}
+
+/**
+ * Obtiene el pedido para el checkout: primero phantom_checkout, luego checkoutProduct, luego URL.
+ * Si obtiene datos de URL o checkoutProduct, los persiste en phantom_checkout para que el resto del checkout funcione.
+ */
+function getCheckoutOrder() {
+  var order = getOrderFromStorage();
+  if (order && (order.productName || order.name)) {
+    if (!order.productName && order.name) order.productName = order.name;
+    if (order.productPrice == null && order.price != null) order.productPrice = Number(order.price);
+    if (!order.productImage && order.image) order.productImage = order.image;
+    return order;
+  }
+  try {
+    var raw = localStorage.getItem("checkoutProduct");
+    if (raw) {
+      order = normalizeOrderPayload(JSON.parse(raw));
+      if (order) {
+        var json = JSON.stringify(order);
+        localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+        sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+        return order;
+      }
+    }
+  } catch (e) {
+    console.error("Error leyendo checkoutProduct", e);
+  }
+  var params = new URLSearchParams(typeof window !== "undefined" && window.location ? window.location.search : "");
+  var name = params.get("name");
+  var price = params.get("price");
+  var image = params.get("image");
+  var qty = params.get("quantity");
+  if (name || price || image) {
+    order = normalizeOrderPayload({
+      name: name || "Producto",
+      price: price || "0",
+      image: image || "",
+      quantity: qty ? parseInt(qty, 10) : 1,
+    });
+    if (order) {
+      var json = JSON.stringify(order);
+      localStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+      sessionStorage.setItem(CHECKOUT_STORAGE_KEY, json);
+      return order;
+    }
+  }
+  return null;
+}
+
+/** Alias: devuelve el pedido para el resumen (usa getCheckoutOrder para tener fallback URL/checkoutProduct). */
 function getCheckoutData() {
-  return getOrderFromStorage();
+  return getCheckoutOrder();
 }
 
 /**
@@ -595,31 +662,20 @@ function formatPrice(price, currency = "USD") {
 }
 
 /**
- * Renderiza el resumen del pedido (imagen, nombre, características, entrega, total).
- * Usa getOrderFromStorage() y getOrderTotal() para datos y precio real.
+ * Renderiza el resumen del pedido en #checkout-summary-content, #checkout-subtotal, #checkout-total.
+ * Muestra #checkout-totals y oculta #checkout-summary-empty si hay producto; si no, muestra vacío y oculta totals.
+ * Usa getCheckoutOrder() (localStorage → checkoutProduct → URL).
  */
-function renderSummary() {
-  const content = document.getElementById("checkout-summary-content");
-  const empty = document.getElementById("checkout-summary-empty");
-  const totals = document.getElementById("checkout-totals");
-  const couponWrap = document.getElementById("checkout-coupon-wrap");
-  const subtotalEl = document.getElementById("checkout-subtotal");
-  const totalEl = document.getElementById("checkout-total");
-  const cryptoAmountEl = document.getElementById("checkout-crypto-amount");
+function renderCheckoutSummary(order) {
+  var content = document.getElementById("checkout-summary-content");
+  var empty = document.getElementById("checkout-summary-empty");
+  var totals = document.getElementById("checkout-totals");
+  var couponWrap = document.getElementById("checkout-coupon-wrap");
+  var subtotalEl = document.getElementById("checkout-subtotal");
+  var totalEl = document.getElementById("checkout-total");
+  var cryptoAmountEl = document.getElementById("checkout-crypto-amount");
 
-  let data;
-  try {
-    data = getOrderFromStorage();
-  } catch (e) {
-    console.error("renderSummary getOrderFromStorage:", e);
-    if (content) content.innerHTML = "";
-    if (empty) empty.classList.remove("hidden");
-    if (totals) totals.classList.add("hidden");
-    if (couponWrap) couponWrap.classList.add("hidden");
-    return null;
-  }
-
-  if (!data || !data.productName) {
+  if (!order || !order.productName) {
     if (content) content.innerHTML = "";
     if (empty) empty.classList.remove("hidden");
     if (totals) totals.classList.add("hidden");
@@ -632,49 +688,67 @@ function renderSummary() {
   if (totals) totals.classList.remove("hidden");
   if (couponWrap) couponWrap.classList.remove("hidden");
 
-  const unitPrice = Number(data.productPrice) || 0;
-  const quantity = getOrderQuantity();
-  const subtotalRaw = Math.round(unitPrice * quantity * 100) / 100;
-  const finalPrice = getOrderTotal();
-  const isCustom = data.productType === "custom" && data.customPackSelections;
-  const productId = data.productId || "";
-  const pack = getPackById(productId) || getPackByProductName(data.productName);
-  const features = pack && pack.features && Array.isArray(pack.features) ? pack.features : [];
-  const deliveryText = getDeliveryEstimate(productId || (pack && pack.id ? pack.id : ""));
+  var unitPrice = Number(order.productPrice) || 0;
+  var quantity = getOrderQuantity();
+  var subtotalRaw = Math.round(unitPrice * quantity * 100) / 100;
+  var finalPrice = getOrderTotal();
+  var isCustom = order.productType === "custom" && order.customPackSelections;
+  var productId = order.productId || "";
+  var pack = null;
+  var features = [];
+  var deliveryText = "Entrega estimada: 1-3 horas";
+  try {
+    pack = getPackById(productId) || getPackByProductName(order.productName);
+    if (pack && pack.features && Array.isArray(pack.features)) features = pack.features;
+    deliveryText = getDeliveryEstimate(productId || (pack && pack.id ? pack.id : ""));
+  } catch (_) {}
 
-  const displayName = quantity > 1 ? (data.productName || "Producto") + " x" + quantity : (data.productName || "Producto");
-  const unitAndQtyHtml = quantity > 1
-    ? `<p class="checkout-summary-unit-qty text-xs text-white/60 mt-1">Precio unitario: ${formatPrice(unitPrice)} · Cantidad: ${quantity}</p>`
+  var displayName = quantity > 1 ? (order.productName || "Producto") + " x" + quantity : (order.productName || "Producto");
+  var unitAndQtyHtml = quantity > 1
+    ? "<p class=\"checkout-summary-unit-qty text-xs text-white/60 mt-1\">Precio unitario: " + formatPrice(unitPrice) + " · Cantidad: " + quantity + "</p>"
     : "";
-
-  const featuresHtml = features.length
-    ? `<ul class="checkout-summary-features">${features.map((f) => `<li>${f}</li>`).join("")}</ul>`
+  var featuresHtml = features.length ? "<ul class=\"checkout-summary-features\">" + features.map(function (f) { return "<li>" + f + "</li>"; }).join("") + "</ul>" : "";
+  var selectionsHtml = isCustom && order.customPackSelections
+    ? "<p class=\"checkout-summary-selections\">" + [order.customPackSelections.dinero, order.customPackSelections.nivel, order.customPackSelections.autos].filter(Boolean).join(" · ") + "</p>"
     : "";
-  const deliveryHtml = `<p class="checkout-summary-delivery">${deliveryText}</p>`;
+  var deliveryHtml = "<p class=\"checkout-summary-delivery\">" + deliveryText + "</p>";
 
-  const html = `
-    <div class="checkout-summary-product">
-      <img src="${data.productImage || ""}" alt="" />
-      <div class="checkout-summary-details">
-        <p class="font-semibold text-white">${displayName}</p>
-        ${unitAndQtyHtml}
-        ${isCustom && data.customPackSelections ? `<p class="checkout-summary-selections">${[data.customPackSelections.dinero, data.customPackSelections.nivel, data.customPackSelections.autos].filter(Boolean).join(" · ")}</p>` : ""}
-        ${featuresHtml}
-        ${deliveryHtml}
-      </div>
-    </div>
-  `;
+  var html = "<div class=\"checkout-summary-product\">" +
+    "<img src=\"" + (order.productImage || "") + "\" alt=\"\" />" +
+    "<div class=\"checkout-summary-details\">" +
+    "<p class=\"font-semibold text-white\">" + displayName + "</p>" +
+    unitAndQtyHtml +
+    selectionsHtml +
+    featuresHtml +
+    deliveryHtml +
+    "</div></div>";
 
   if (content) content.innerHTML = html;
-
   if (subtotalEl) subtotalEl.textContent = formatPrice(subtotalRaw);
   if (totalEl) {
     totalEl.textContent = formatOrderTotal(finalPrice);
     totalEl.dataset.finalPrice = String(finalPrice);
   }
   if (cryptoAmountEl) cryptoAmountEl.textContent = "Total: " + formatOrderTotal(finalPrice);
+  return { data: order, unitPrice: unitPrice, finalPrice: finalPrice };
+}
 
-  return { data, unitPrice, finalPrice };
+/**
+ * Obtiene el pedido (getCheckoutOrder) y renderiza el resumen. Si no hay pedido, muestra estado vacío.
+ */
+function renderSummary() {
+  var content = document.getElementById("checkout-summary-content");
+  var empty = document.getElementById("checkout-summary-empty");
+  var totals = document.getElementById("checkout-totals");
+  var couponWrap = document.getElementById("checkout-coupon-wrap");
+
+  var data = null;
+  try {
+    data = getCheckoutOrder();
+  } catch (e) {
+    console.error("renderSummary getCheckoutOrder:", e);
+  }
+  return renderCheckoutSummary(data);
 }
 
 function setupCoupon() {

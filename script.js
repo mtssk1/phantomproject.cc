@@ -502,6 +502,7 @@ const CHECKOUT_STORAGE_KEY = "phantom_checkout";
 function saveCheckoutAndRedirect(payload) {
   try {
     localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem("checkoutProduct", JSON.stringify(payload));
   } catch (_) {}
   window.location.href = "checkout.html";
 }
