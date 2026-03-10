@@ -499,7 +499,7 @@ function initPayPalButtons() {
                 currency_code: PAYPAL_CURRENCY,
                 value: total
               }
-            }];
+            }]
           });
         });
       },
