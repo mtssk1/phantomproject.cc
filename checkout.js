@@ -466,11 +466,12 @@ function initPayPalButtons() {
     return;
   }
 
-  var order = getOrderFromStorage();
-  if (!order || !order.productName) {
+  var order = getCheckoutOrder();
+  if (!order || (!order.productName && !order.name && (order.productPrice == null || order.price == null))) {
     container.innerHTML = '<p class="text-sm text-white/50">No hay pedido activo. Agregá un producto desde la tienda.</p>';
     return;
   }
+  if (!order.productName) order.productName = order.name || "Producto";
 
   ensureCheckoutOrderId();
   container.innerHTML = "";
@@ -481,26 +482,26 @@ function initPayPalButtons() {
         var total = getPayPalAmountString();
         var totalEl = document.getElementById("checkout-total");
         if (totalEl && totalEl.textContent) {
-          var parsed = totalEl.textContent.replace(/[^\d.,]/g, "").replace(",", ".");
-          if (parsed) total = Number(parsed).toFixed(2);
+          var parsed = (totalEl.textContent || "").replace(/[^\d.,]/g, "").replace(",", ".");
+          if (parsed) total = String(Number(parsed).toFixed(2));
         }
+        if (typeof total !== "string" || total.indexOf(",") >= 0) total = String(Number(total).toFixed(2));
         var customer = getCheckoutCustomerData();
         if (!customer.customer_email || !customer.customer_discord) {
           alert("Completá correo electrónico y Discord del cliente antes de pagar.");
           throw new Error("Faltan datos de contacto");
         }
-        return Promise.resolve().then(function () {
-          return syncOrderToBackend();
-        }).then(function () {
-          return actions.order.create({
-            purchase_units: [{
-              description: PAYPAL_SAFE_DESCRIPTION,
-              amount: {
-                currency_code: PAYPAL_CURRENCY,
-                value: total
-              }
-            }]
-          });
+        syncOrderToBackend().catch(function (e) {
+          console.warn("[Checkout] syncOrderToBackend falló (el pago sigue):", e);
+        });
+        return actions.order.create({
+          purchase_units: [{
+            description: PAYPAL_SAFE_DESCRIPTION,
+            amount: {
+              currency_code: PAYPAL_CURRENCY,
+              value: total
+            }
+          }]
         });
       },
       onApprove: function (data, actions) {
@@ -514,8 +515,10 @@ function initPayPalButtons() {
         });
       },
       onError: function (err) {
-        console.error("PayPal error:", err);
-        alert("Hubo un error al iniciar el pago con PayPal.");
+        console.error("[Checkout] PayPal onError:", err);
+        var msg = (err && err.message) ? err.message : (err && err.toString ? err.toString() : "Error desconocido");
+        console.error("[Checkout] PayPal detalle:", msg);
+        alert("Hubo un error al iniciar el pago con PayPal. Revisá que correo y Discord estén completos. Detalle: " + msg);
       }
     }).render("#paypal-button-container");
   } catch (err) {
