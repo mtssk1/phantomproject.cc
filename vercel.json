@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/checkout", "destination": "/checkout.html" },
     { "source": "/success", "destination": "/success.html" }
