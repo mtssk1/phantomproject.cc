@@ -55,20 +55,46 @@ function renderOrderSummary(data) {
   container.innerHTML = html;
 }
 
-async function confirmPaymentAndGetOrder(orderId, paymentMethod, paypalOrderId, cryptoInvoiceId) {
-  const url = (API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE) + "/confirm-payment";
+async function sendOrderToDiscordFallback(data) {
+  const url = (API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE) + "/send-order-discord";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: data.orderId || data.order_id || "—",
+        productName: data.productName || data.product_name || "—",
+        quantity: data.quantity != null ? data.quantity : "—",
+        total: data.productPrice != null ? data.productPrice : (data.total != null ? data.total : "—"),
+        paymentMethod: data.paymentMethod || data.payment_method || "—",
+      }),
+    });
+    return res.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function confirmPaymentAndGetOrder(orderId, paymentMethod, paypalOrderId, cryptoInvoiceId, orderData) {
+  const baseUrl = API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE;
+  const confirmUrl = baseUrl + "/confirm-payment";
   const body = { order_id: orderId, payment_method: paymentMethod || "paypal" };
   if (paypalOrderId) body.paypal_order_id = paypalOrderId;
   if (cryptoInvoiceId) body.crypto_invoice_id = cryptoInvoiceId;
   try {
-    await fetch(url, {
+    const confirmRes = await fetch(confirmUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-  } catch (_) {}
+    if (!confirmRes.ok && confirmRes.status === 404 && orderData) {
+      await sendOrderToDiscordFallback(orderData);
+    }
+  } catch (_) {
+    if (orderData) sendOrderToDiscordFallback(orderData).catch(function () {});
+  }
 
-  const getUrl = (API_BASE.startsWith("http") ? API_BASE : window.location.origin + API_BASE) + "/order?order_id=" + encodeURIComponent(orderId);
+  const getUrl = baseUrl + "/order?order_id=" + encodeURIComponent(orderId);
   try {
     const res = await fetch(getUrl);
     if (res.ok) return await res.json();
@@ -106,7 +132,7 @@ function init() {
   if (orderIdRepeat) orderIdRepeat.textContent = orderId;
   renderOrderSummary(data);
 
-  confirmPaymentAndGetOrder(orderId, paymentMethod, paypalOrderId, cryptoInvoiceId).then(function (orderFromApi) {
+  confirmPaymentAndGetOrder(orderId, paymentMethod, paypalOrderId, cryptoInvoiceId, data).then(function (orderFromApi) {
     if (orderFromApi) {
       renderOrderSummary(orderFromApi);
       if (emailMsg && orderFromApi.email_sent) emailMsg.classList.remove("hidden");
