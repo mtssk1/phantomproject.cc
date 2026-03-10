@@ -532,8 +532,8 @@ function saveCheckoutAndRedirect(payload) {
   } catch (e) {
     console.error("[Checkout] Error al guardar en storage:", e);
   }
-  console.log("[Checkout] Redirigiendo a checkout.html");
-  window.location.href = "checkout.html";
+  console.log("[Checkout] Redirigiendo a checkout");
+  window.location.href = "/checkout";
 }
 
 function buildCheckoutPayloadFromPack(pack, price, customPackSelections) {
@@ -579,7 +579,7 @@ function applyCheckoutButton() {
   var btn = document.getElementById("cart-checkout");
   if (!btn) return;
   btn.textContent = "Finalizar compra";
-  btn.href = "checkout.html";
+  btn.href = "/checkout";
   btn.removeAttribute("data-link");
   btn.addEventListener("click", function goToCheckout(e) {
     e.preventDefault();
@@ -597,7 +597,7 @@ function applyCheckoutButton() {
             productId: first.variant_id || "",
           });
         } else {
-          window.location.href = "checkout.html";
+          window.location.href = "/checkout";
         }
       });
       return;
@@ -607,7 +607,7 @@ function applyCheckoutButton() {
     if (first) {
       saveCheckoutAndRedirect(buildCheckoutPayloadFromCartItem(first));
     } else {
-      window.location.href = "checkout.html";
+      window.location.href = "/checkout";
     }
   });
 }

@@ -33,7 +33,7 @@ const CHECKOUT_DISCORD_URL = "https://discord.gg/QWKxtrREjP";
 const PAYPAL_CLIENT_ID = "AWYpiARmUhLVbBIm1h5K0CNIfcNOTNDDiRyrp3Bj5PVz-ii7PnstyZXHu2d9L3EdVLde3kpfC7v6PrLM";
 const PAYPAL_CURRENCY = "USD";
 /** Redirección tras pago aprobado. */
-const SUCCESS_PAGE_URL = "https://phantomproject.cc/success.html";
+const SUCCESS_PAGE_URL = "https://www.phantomproject.cc/success";
 /** Textos seguros enviados a PayPal en purchase_units (no mencionar marcas). */
 const PAYPAL_SAFE_NAME = "Digital Gaming Service";
 const PAYPAL_SAFE_DESCRIPTION = "Online Progress Service";
@@ -44,7 +44,7 @@ const PAYPAL_SAFE_DESCRIPTION = "Online Progress Service";
  */
 const NOWPAYMENTS_API_KEY = "ZJFNCBG-H6EM4PZ-MDAYGTW-8G968V8";
 const NOWPAYMENTS_INVOICE_URL = "https://api.nowpayments.io/v1/invoice";
-const NOWPAYMENTS_SUCCESS_URL = "https://phantomproject.cc/success.html";
+const NOWPAYMENTS_SUCCESS_URL = "https://www.phantomproject.cc/success";
 const NOWPAYMENTS_CANCEL_URL = "https://phantomproject.cc";
 /** Moneda de pago: USDT red TRC20. Valor según API NOWPayments (p. ej. usdttrc20). */
 const NOWPAYMENTS_PAY_CURRENCY = "usdttrc20";
@@ -510,7 +510,7 @@ function initPayPalButtons() {
             completeOrderAndRedirectToSuccess("paypal", { paypalOrderId: data.orderID });
           } else {
             alert("Pago completado correctamente.");
-            window.location.href = typeof SUCCESS_PAGE_URL !== "undefined" ? SUCCESS_PAGE_URL : "/success.html";
+            window.location.href = typeof SUCCESS_PAGE_URL !== "undefined" ? SUCCESS_PAGE_URL : "/success";
           }
         });
       },
