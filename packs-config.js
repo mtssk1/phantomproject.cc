@@ -36,11 +36,11 @@ window.PACKS_CONFIG = {
     nivel: [
       { label: "1", value: "1", extra: 0 },
       { label: "50", value: "50", extra: 1.99 },
-      { label: "120", value: "120", extra: 1.99 },
-      { label: "200", value: "200", extra: 1.99 },
-      { label: "300", value: "300", extra: 1.99 },
-      { label: "500", value: "500", extra: 1.99 },
-      { label: "750", value: "750", extra: 1.99 },
+      { label: "120", value: "120", extra: 2.99 },
+      { label: "200", value: "200", extra: 3.99 },
+      { label: "300", value: "300", extra: 4.99 },
+      { label: "500", value: "500", extra: 5.99 },
+      { label: "750", value: "750", extra: 6.99 },
     ],
     autos: [
       { label: "0", value: "0", extra: 0 },
