@@ -979,7 +979,7 @@ function initCustomPackModal(pack) {
     imgEl.src = pack.image;
     imgEl.alt = pack.title;
   }
-  let state = {
+  var state = {
     dinero: cfg.defaultDinero,
     nivel: cfg.defaultNivel,
     autos: cfg.defaultAutos,
@@ -987,27 +987,34 @@ function initCustomPackModal(pack) {
   if (customWrap) customWrap._customPackState = state;
 
   function updatePrice() {
-    const total = computeCustomPackTotal(state);
+    var s = customWrap && customWrap._customPackState;
+    if (!s) return;
+    var total = computeCustomPackTotal(s);
     if (priceEl) priceEl.textContent = formatPrice(total, cfg.currency);
   }
 
   function renderAll() {
-    renderCustomPackConfigurator("custom-config-dinero", cfg.dinero, state.dinero, "dinero");
-    renderCustomPackConfigurator("custom-config-nivel", cfg.nivel, state.nivel, "nivel");
-    renderCustomPackConfigurator("custom-config-autos", cfg.autos, state.autos, "autos");
+    var s = customWrap && customWrap._customPackState;
+    if (!s) return;
+    renderCustomPackConfigurator("custom-config-dinero", cfg.dinero, s.dinero, "dinero");
+    renderCustomPackConfigurator("custom-config-nivel", cfg.nivel, s.nivel, "nivel");
+    renderCustomPackConfigurator("custom-config-autos", cfg.autos, s.autos, "autos");
     updatePrice();
   }
 
-  customWrap.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-group][data-value]");
-    if (!btn) return;
-    const group = btn.dataset.group;
-    const value = btn.dataset.value;
-    if (group && value && state.hasOwnProperty(group)) {
-      state[group] = value;
+  if (customWrap && !customWrap._customPackClickBound) {
+    customWrap._customPackClickBound = true;
+    customWrap.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-group][data-value]");
+      if (!btn) return;
+      var group = btn.getAttribute("data-group");
+      var value = btn.getAttribute("data-value");
+      var st = customWrap._customPackState;
+      if (!st || !group || !value || !st.hasOwnProperty(group)) return;
+      st[group] = value;
       renderAll();
-    }
-  });
+    });
+  }
 
   renderAll();
 }
